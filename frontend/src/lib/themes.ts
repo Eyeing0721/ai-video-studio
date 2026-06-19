@@ -1,13 +1,13 @@
 import type { ThemeConfig, ThemePreset } from '../types/theme'
 
-// Real photo wallpapers - each theme gets a matching atmospheric image
+// AI-generated wallpapers (Z-Image Turbo) + CSS gradient fallback
 const WALLPAPERS: Record<string, string> = {
-  light: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80), linear-gradient(135deg, #F4F3F0, #E5E0DA)',
-  dark: 'url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80), linear-gradient(135deg, #1A1B1E, #15161A)',
-  mocha: 'url(https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1920&q=80), radial-gradient(ellipse at 30% 30%, #A47864, #F5EFE8)',
-  sakura: 'url(https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1920&q=80), linear-gradient(135deg, #FDF6F5, #FEDFE1)',
-  synthwave: 'url(https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80), linear-gradient(180deg, #0A0020, #FF4470)',
-  tokyo: 'url(https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1920&q=80), linear-gradient(180deg, #0A0F25, #1A1D2E)',
+  light: 'url(/media/wallpapers/light.png), linear-gradient(135deg, #F4F3F0, #E5E0DA)',
+  dark: 'url(/media/wallpapers/dark.png), linear-gradient(135deg, #1A1B1E, #15161A)',
+  mocha: 'url(/media/wallpapers/mocha.png), linear-gradient(135deg, #D4C4B0, #F5EFE8)',
+  sakura: 'url(/media/wallpapers/sakura.png), linear-gradient(135deg, #FDF6F5, #FEDFE1)',
+  synthwave: 'url(/media/wallpapers/synthwave.png), linear-gradient(180deg, #0A0020, #FF4470)',
+  tokyo: 'url(/media/wallpapers/tokyo.png), linear-gradient(180deg, #0A0F25, #1A1D2E)',
 }
 
 export const PRESETS: Record<ThemePreset, ThemeConfig> = {
