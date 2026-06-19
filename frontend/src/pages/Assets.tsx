@@ -30,18 +30,13 @@ export default function Assets() {
   }, [])
 
   const getAudioUrl = (item: Record<string, unknown>) => {
-    // Use Pixabay CDN URL from API — works without local download
-    const url = (item as BgmItem).url
-    if (url) return url
-    // Fallback: try local file
     const id = (item.id as string) || ''
-    return id ? `/media/bgm/${id.replace('bgm_', '')}.mp3` : ''
+    // Local file first (fast, offline), CDN fallback
+    return `/media/bgm/${id}.mp3`
   }
 
   const hasLocalAudio = (_item: Record<string, unknown>) => {
-    // All BGM tracks have Pixabay URLs — always show play button
-    const url = (_item as BgmItem).url
-    return !!(url)
+    return true  // All tracks playable: local files being downloaded + CDN fallback
   }
 
   const togglePlay = (itemId: string, item: Record<string, unknown>) => {
@@ -52,12 +47,13 @@ export default function Assets() {
     }
     if (audioRef.current) {
       audioRef.current.pause()
-      audioRef.current.src = getAudioUrl(item)
+      const localUrl = getAudioUrl(item)
+      audioRef.current.src = localUrl
       audioRef.current.play().catch(() => {
-        // Fallback: try Pixabay URL if local fails
-        const url = (item as BgmItem).url
-        if (url && audioRef.current) {
-          audioRef.current.src = url
+        // CDN fallback if local file not downloaded yet
+        const cdn = (item as BgmItem).url
+        if (cdn && audioRef.current) {
+          audioRef.current.src = cdn
           audioRef.current.play().catch(() => {})
         }
       })
