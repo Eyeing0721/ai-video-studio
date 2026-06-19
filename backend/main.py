@@ -275,6 +275,21 @@ async def bgm_recommend(template: str = "micro_drama"):
     from services.bgm_library import recommend_for_template
     return recommend_for_template(template)
 
+@app.get("/api/bgm/reference")
+async def bgm_reference(mood: str = "", genre: str = "", use_case: str = "", pd_only: bool = False):
+    from services.bgm_library import search_reference
+    return search_reference(
+        mood=mood if mood else None,
+        genre=genre if genre else None,
+        use_case=use_case if use_case else None,
+        public_domain_only=pd_only,
+    )
+
+@app.get("/api/luts")
+async def list_luts():
+    from services.bgm_library import LUT_CATALOG
+    return LUT_CATALOG
+
 
 # ── Text Creation ──────────────────────────────────────
 

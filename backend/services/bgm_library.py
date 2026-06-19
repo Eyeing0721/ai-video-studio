@@ -225,3 +225,293 @@ def recommend_for_template(template_id: str, shot_moods: list[str] | None = None
             unique.append(b)
 
     return unique[:5]  # Top 5 matches
+
+
+# ── Reference Track Catalog ──────────────────────────────
+# Commonly-used editing tracks. Some are copyrighted — listed as reference
+# with climax timestamps so users can source their own licensed copies.
+# Public domain tracks include download URLs.
+
+REFERENCE_TRACKS: list[dict] = [
+    # ── Public Domain Classical ────────────────────────────
+    {
+        "id": "ref_gymnopedie_no1",
+        "name": "Gymnopedie No.1",
+        "name_cn": "裸体舞曲第一号",
+        "composer": "Erik Satie",
+        "era": "1888",
+        "genre": "classical",
+        "tags": ["钢琴", "忧伤", "宁静", "法国", "印象派"],
+        "bpm": 65,
+        "duration_sec": 180,
+        "mood": ["melancholic", "peaceful", "nostalgic"],
+        "use_case": ["纪录片", "文艺片", "情感段落"],
+        "climax_sections": [
+            {"label": "标志性开场", "start_sec": 0, "end_sec": 45, "note": "最常使用的段落，缓慢下行旋律"},
+            {"label": "情感高潮", "start_sec": 90, "end_sec": 135, "note": "和声变化最丰富的段落"},
+        ],
+        "license": "Public Domain",
+        "download_url": "https://musopen.org/music/4733-gymnopedie-no-1/",
+        "bundled": False,
+    },
+    {
+        "id": "ref_clair_de_lune",
+        "name": "Clair de Lune",
+        "name_cn": "月光",
+        "composer": "Claude Debussy",
+        "era": "1905",
+        "genre": "classical",
+        "tags": ["钢琴", "印象派", "梦幻", "法国"],
+        "bpm": 55,
+        "duration_sec": 300,
+        "mood": ["dreamy", "romantic", "ethereal"],
+        "use_case": ["纪录片", "婚礼", "情感高潮"],
+        "climax_sections": [
+            {"label": "最常用高潮段", "start_sec": 120, "end_sec": 210, "note": "琶音上行后主题再现，情感最饱满"},
+        ],
+        "license": "Public Domain",
+        "download_url": "https://musopen.org/music/4413-clair-de-lune/",
+        "bundled": False,
+    },
+    {
+        "id": "ref_ave_maria",
+        "name": "Ave Maria",
+        "name_cn": "圣母颂",
+        "composer": "Franz Schubert",
+        "era": "1825",
+        "genre": "classical",
+        "tags": ["声乐", "神圣", "庄严", "弦乐"],
+        "bpm": 45,
+        "duration_sec": 270,
+        "mood": ["sacred", "solemn", "beautiful"],
+        "use_case": ["婚礼", "纪念", "情感段落"],
+        "climax_sections": [
+            {"label": "高潮段落", "start_sec": 90, "end_sec": 180, "note": "旋律上升至最高音后回落"},
+        ],
+        "license": "Public Domain",
+        "download_url": "https://musopen.org/music/8823-ave-maria-d839/",
+        "bundled": False,
+    },
+    {
+        "id": "ref_canon_in_d",
+        "name": "Canon in D",
+        "name_cn": "D大调卡农",
+        "composer": "Johann Pachelbel",
+        "era": "1680",
+        "genre": "classical",
+        "tags": ["弦乐", "婚礼", "经典", "巴洛克"],
+        "bpm": 70,
+        "duration_sec": 330,
+        "mood": ["elegant", "romantic", "joyful"],
+        "use_case": ["婚礼", "广告", "温馨场景"],
+        "climax_sections": [
+            {"label": "最经典段落", "start_sec": 60, "end_sec": 180, "note": "主题层层叠加，弦乐渐强至最著名段落"},
+        ],
+        "license": "Public Domain",
+        "download_url": "https://musopen.org/music/4711-canon-in-d/",
+        "bundled": False,
+    },
+    {
+        "id": "ref_four_seasons_spring",
+        "name": "The Four Seasons - Spring (I. Allegro)",
+        "name_cn": "四季·春 第一乐章",
+        "composer": "Antonio Vivaldi",
+        "era": "1723",
+        "genre": "classical",
+        "tags": ["小提琴", "巴洛克", "欢快", "活力"],
+        "bpm": 120,
+        "duration_sec": 200,
+        "mood": ["energetic", "joyful", "bright"],
+        "use_case": ["Vlog", "广告", "欢快场景"],
+        "climax_sections": [
+            {"label": "标志性开场", "start_sec": 0, "end_sec": 30, "note": "最强辨识度的段落"},
+        ],
+        "license": "Public Domain",
+        "download_url": "https://musopen.org/music/2212-the-four-seasons-spring/",
+        "bundled": False,
+    },
+    # ── Commonly Used (Copyrighted — Reference Only) ──────
+    {
+        "id": "ref_tori_no_uta",
+        "name": "Tori no Uta",
+        "name_cn": "鸟之诗",
+        "artist": "Lia",
+        "source": "AIR (Key/Visual Arts)",
+        "genre": "anime_op",
+        "tags": ["动漫", "钢琴", "情感", "女声", "经典"],
+        "bpm": 122,
+        "duration_sec": 360,
+        "mood": ["nostalgic", "emotional", "beautiful", "epic"],
+        "use_case": ["MAD/AMV", "情感高潮", "回忆段落"],
+        "climax_sections": [
+            {"label": "副歌高潮", "start_sec": 57, "end_sec": 97, "note": "最常用段落，「あの鳥は」开始"},
+            {"label": "钢琴间奏后高潮", "start_sec": 157, "end_sec": 197, "note": "第二段副歌，情感递进"},
+            {"label": "最终副歌", "start_sec": 270, "end_sec": 330, "note": "编曲最饱满的段落"},
+        ],
+        "license": "Copyrighted",
+        "download_url": "",
+        "bundled": False,
+    },
+    {
+        "id": "ref_arigatou_kokia",
+        "name": "Arigatou...",
+        "name_cn": "ありがとう... (谢谢)",
+        "artist": "KOKIA",
+        "source": "KOKIA",
+        "genre": "jpop_ballad",
+        "tags": ["日本", "女声", "感人", "钢琴", "弦乐"],
+        "bpm": 70,
+        "duration_sec": 250,
+        "mood": ["emotional", "grateful", "tearful", "heartfelt"],
+        "use_case": ["纪录片", "毕业/离别", "情感高潮", "催泪段落"],
+        "climax_sections": [
+            {"label": "最强情感爆发段", "start_sec": 105, "end_sec": 160, "note": "「ありがとう」重复段落，弦乐全开+高音"},
+            {"label": "结尾感人段", "start_sec": 200, "end_sec": 240, "note": "最后的「ありがとう」渐弱收束"},
+        ],
+        "license": "Copyrighted",
+        "download_url": "",
+        "bundled": False,
+    },
+    {
+        "id": "ref_river_flows_in_you",
+        "name": "River Flows in You",
+        "name_cn": "你的心河",
+        "artist": "Yiruma",
+        "genre": "new_age",
+        "tags": ["钢琴", "韩国", "情感", "清新"],
+        "bpm": 65,
+        "duration_sec": 180,
+        "mood": ["romantic", "peaceful", "bittersweet"],
+        "use_case": ["婚礼", "Vlog", "回忆段落"],
+        "climax_sections": [
+            {"label": "高潮段落", "start_sec": 60, "end_sec": 120, "note": "左手琶音加速，右手旋律上行至最高音"},
+        ],
+        "license": "Copyrighted",
+        "download_url": "",
+        "bundled": False,
+    },
+    {
+        "id": "ref_merry_go_round",
+        "name": "Merry-Go-Round of Life",
+        "name_cn": "人生的旋转木马",
+        "artist": "Joe Hisaishi",
+        "source": "Howl's Moving Castle",
+        "genre": "soundtrack",
+        "tags": ["宫崎骏", "久石让", "管弦乐", "梦幻", "华尔兹"],
+        "bpm": 90,
+        "duration_sec": 300,
+        "mood": ["magical", "romantic", "whimsical"],
+        "use_case": ["纪录片", "文艺片", "梦幻场景"],
+        "climax_sections": [
+            {"label": "最经典段落", "start_sec": 30, "end_sec": 90, "note": "主旋律首次完整呈现，辨识度最高"},
+        ],
+        "license": "Copyrighted",
+        "download_url": "",
+        "bundled": False,
+    },
+]
+
+# ── LUT / Color Grading Catalog ──────────────────────────
+
+LUT_CATALOG: list[dict] = [
+    {
+        "id": "lut_teal_orange",
+        "name": "Teal Orange Hollywood",
+        "name_cn": "青橙好莱坞",
+        "style": "cinematic",
+        "tags": ["电影感", "暖肤色", "冷暗部", "大片"],
+        "color_temp": "mixed",
+        "contrast": "high",
+        "use_case": ["微短剧", "预告片", "电影感内容"],
+        "url": "",
+        "bundled": False,
+    },
+    {
+        "id": "lut_tokyo_night",
+        "name": "Tokyo Night",
+        "name_cn": "东京之夜",
+        "style": "urban",
+        "tags": ["赛博", "冷色调", "霓虹", "暗调"],
+        "color_temp": "cool",
+        "contrast": "high",
+        "use_case": ["合成波风格", "夜拍", "都市内容"],
+        "url": "",
+        "bundled": False,
+    },
+    {
+        "id": "lut_vintage_film",
+        "name": "Vintage Film Fade",
+        "name_cn": "复古胶片褪色",
+        "style": "vintage",
+        "tags": ["胶片", "褪色", "暖调", "颗粒感"],
+        "color_temp": "warm",
+        "contrast": "low",
+        "use_case": ["纪录片", "回忆段落", "文艺Vlog"],
+        "url": "",
+        "bundled": False,
+    },
+    {
+        "id": "lut_sakura_bloom",
+        "name": "Sakura Bloom",
+        "name_cn": "樱花绽放",
+        "style": "japanese",
+        "tags": ["日系", "粉色调", "清新", "低饱和"],
+        "color_temp": "slightly_warm",
+        "contrast": "low",
+        "use_case": ["和风主题", "旅行Vlog", "文艺内容"],
+        "url": "",
+        "bundled": False,
+    },
+    {
+        "id": "lut_forest_mood",
+        "name": "Forest Mood",
+        "name_cn": "森林色调",
+        "style": "nature",
+        "tags": ["自然", "绿色增强", "柔和", "户外"],
+        "color_temp": "neutral",
+        "contrast": "medium",
+        "use_case": ["自然纪录片", "户外Vlog", "旅行"],
+        "url": "",
+        "bundled": False,
+    },
+    {
+        "id": "lut_bw_dramatic",
+        "name": "Black & White Dramatic",
+        "name_cn": "黑白戏剧",
+        "style": "monochrome",
+        "tags": ["黑白", "高对比", "经典", "严肃"],
+        "color_temp": "bw",
+        "contrast": "high",
+        "use_case": ["严肃题材", "纪录片采访", "艺术短片"],
+        "url": "",
+        "bundled": False,
+    },
+]
+
+
+def search_reference(
+    mood: str | None = None,
+    genre: str | None = None,
+    use_case: str | None = None,
+    public_domain_only: bool = False,
+) -> list[dict]:
+    """Search reference tracks with optional filters."""
+    results = REFERENCE_TRACKS
+    if public_domain_only:
+        results = [t for t in results if t["license"] == "Public Domain"]
+    if mood:
+        results = [t for t in results if mood.lower() in [m.lower() for m in t["mood"]]]
+    if genre:
+        results = [t for t in results if genre.lower() == t["genre"].lower()]
+    if use_case:
+        results = [t for t in results if any(use_case.lower() in u.lower() for u in t["use_case"])]
+    return results
+
+
+def get_climax_segments(track_id: str) -> list[dict]:
+    """Get the commonly-used climax/hot sections for a specific track."""
+    all_tracks = BGM_CATALOG + REFERENCE_TRACKS
+    for t in all_tracks:
+        if t["id"] == track_id:
+            return t.get("climax_sections", [])
+    return []
