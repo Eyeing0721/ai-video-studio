@@ -388,6 +388,27 @@ async def recommend_styles(template: str = "vlog"):
     }
 
 
+# ── Cinema Styles ─────────────────────────────────────
+
+@app.get("/api/styles/directors")
+async def list_director_styles():
+    from services.cinema_styles import get_director_styles
+    return get_director_styles()
+
+@app.get("/api/styles/films")
+async def list_film_styles():
+    from services.cinema_styles import get_film_styles
+    return get_film_styles()
+
+@app.get("/api/styles/{style_id}")
+async def get_style(style_id: str):
+    from services.cinema_styles import get_style
+    s = get_style(style_id)
+    if not s:
+        return {"error": "not found"}
+    return s
+
+
 # ── Storyboard Approval ───────────────────────────────
 
 @app.post("/api/tasks/{task_id}/approve")
