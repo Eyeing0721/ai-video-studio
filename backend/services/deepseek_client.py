@@ -113,63 +113,22 @@ STORYBOARD_SYSTEM = """你是一位资深电影摄影师和分镜师。运用纪
 [{"id":1,"duration_sec":4.5,"shot_type":"wide","description":"从房间高处角落的视角俯瞰...（中文同前）","english_prompt":"hyperrealistic, photorealistic, 8k raw, cinematic lighting, volumetric lighting with visible dust particles in light beam, ray tracing global illumination, anamorphic lens flare, shot on Arri Alexa 65, 35mm film grain. Wide establishing shot from high corner angle of a sealed 30-square-meter room with no windows or doors. Peeling cream-colored lime plaster walls with gray concrete exposed at corners, 3-meter ceiling. Single flickering tungsten filament bulb hanging from black braided wire at center, casting unstable 2800K warm orange light that makes shadows jump with each flicker. Thick layer of dust motes dancing slowly in the light cone. Dark brown round wooden table 2 meters diameter at center, surface covered with scratches, cup rings, and decades of wear. Antique brass mantel clock 40cm tall at table center, enamel face yellowed with age, intricate acanthus leaf relief corroded by green patina. Ten men and women of various ages slumped around the table — some faces pressed against wood, others leaning back in chairs, all in deep unconsciousness. One figure stands beside the table: tall lean man in tailored black wool suit, wearing an actual taxidermied goat head as a mask — yellowed white fur matted and clumped, irregular gray eye holes revealing wet human eyes behind. Deep shadows in all four corners, almost black. dark atmospheric, moody cinematography, professional color grading, masterpiece, trending on artstation","action":"钨丝灯闪烁，十个沉睡者无声呼吸，山羊头缓缓转动头部扫视众人","dialogue":"","mood":"压抑 诡异 窒息 潮湿 时间停滞","camera_motion":"slow_push_in","lighting":"单一钨丝灯泡顶光，2800K暖橙，浓重硬阴影，四个角落接近全黑，灰尘在光柱中缓慢飘浮"}]"""
 
 
-STORYBOARD_USER = """Analyze the following story and create a professional cinematography storyboard. Output a comprehensive JSON package that a filmmaker can immediately use.
+STORYBOARD_USER = """Create a cinematography storyboard for this story. Output ONLY a JSON array of shots. Keep it simple and valid.
 
-The JSON must contain:
+Each shot object:
 {{
-  "project_title": "English title summarizing the story",
-  "genre": "genre tags",
-  "estimated_total_duration_sec": total,
-  "editing_plan": {{
-    "pacing": "fast/medium/slow with rationale",
-    "transition_style": "dominant transition type",
-    "color_palette": "overall color approach",
-    "music_mood": "recommended BGM mood",
-    "edit_notes": "key editing decisions and why",
-    "opening_strategy": "how the first 3 seconds hook viewers",
-    "climax_placement": "where and how the emotional peak hits"
-  }},
-  "characters": [
-    {{
-      "id": "char_1",
-      "name": "character name",
-      "nationality": "specific nationality/ethnicity",
-      "age": "exact age number",
-      "body_type": "height, build specifics",
-      "face": "detailed facial features — eye shape, nose, lips, jaw, cheekbones, skin texture, scars, asymmetry",
-      "hair": "exact style, color, length, texture, condition",
-      "clothing": "exact garments with material, color, wear condition",
-      "unique_mark": "one instantly recognizable feature",
-      "voice_description": "for TTS — natural speaking style"
-    }}
-  ],
-  "scene": {{
-    "location": "exact room/building description",
-    "dimensions": "size in meters",
-    "walls": "material, color, condition",
-    "floor": "material, color, condition",
-    "ceiling": "height, features",
-    "light_sources": [{{"type": "...", "position": "...", "color_temp": "...", "intensity": "..."}}],
-    "furniture": [{{"name": "...", "position": "...", "material": "...", "condition": "..."}}],
-    "atmosphere": "dust, humidity, temperature feel, smell hints"
-  }},
-  "shots": [
-    {{
-      "id": 1,
-      "duration_sec": 3.5,
-      "shot_type": "wide/medium/close_up etc",
-      "camera_motion": "specific camera move — never static",
-      "camera_motion_detail": "how the camera moves through the scene",
-      "description_en": "English visual description 150-400 words with all character/scene/lighting/camera details",
-      "prompt_image": "English prompt optimized for AI image generation — MUST describe the MOMENT BEFORE the main action (e.g. water droplet hanging, not splashing; fist raised, not punching; door closed, not opening). Include all quality modifiers. Start with: hyperrealistic, photorealistic, 8k raw, cinematic lighting, volumetric lighting, ray tracing, arri alexa 65, 35mm film grain. End with: dark atmospheric, moody cinematography, professional color grading, masterpiece. Include every character visible with their exact appearance from the character bible. 200-400 words.",
-      "prompt_video": "English prompt for AI video generation — describe the MOTION and CAMERA MOVEMENT only (image carries the visual anchor). Focus on: what moves, how it moves, camera movement direction and speed. Include: 'no speech, no dialogue, silent, instrumental only' for Sulphur model. 30-80 words.",
-      "dialogue_cn": "Chinese dialogue lines (can be empty)",
-      "mood": "3-6 English mood keywords",
-      "lighting": "detailed English lighting description",
-      "notes": "key considerations for this specific shot"
-    }}
-  ]
+  "id": 1,
+  "duration_sec": 3.5,
+  "shot_type": "wide/medium/close_up etc",
+  "camera_motion": "specific camera move",
+  "prompt_image": "English AI image prompt. MUST capture the MOMENT BEFORE the main action. Include: hyperrealistic, photorealistic, 8k raw quality modifiers at start. Include: detailed character appearance, scene description, lighting. End with: masterpiece, cinematic.",
+  "prompt_video": "English AI video prompt. Describe MOTION + CAMERA MOVEMENT only. Visual details come from the image.",
+  "dialogue_cn": "Chinese dialogue (can be empty string)",
+  "mood": "3-6 English mood keywords"
 }}
+
+Keep each prompt_image 100-200 words. Keep prompt_video 20-50 words.
+Output ONLY the JSON array. No markdown, no explanation.
 
 Story: {text}"""
 
