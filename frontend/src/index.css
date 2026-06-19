@@ -9,11 +9,17 @@
   }
   body {
     margin: 0;
-    background: var(--theme-bg);
-    background-image:
-      radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--theme-accent) 4%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--theme-accent) 3%, transparent) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    background-color: var(--theme-bg);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  /* Background blur overlay — adjustable frosted glass over wallpaper */
+  #bg-frost {
+    position: fixed; inset: 0; z-index: 0;
+    backdrop-filter: blur(var(--blur-background, 0px));
+    -webkit-backdrop-filter: blur(var(--blur-background, 0px));
+    pointer-events: none;
   }
   /* Wallpaper set directly on body via JS */
 

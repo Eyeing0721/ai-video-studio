@@ -21,6 +21,7 @@ export interface ThemeBlur {
   card: string
   modal: string
   panel: string
+  background: string
 }
 
 export interface ThemeConfig {

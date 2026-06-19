@@ -15,6 +15,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <div id="bg-frost" />
         <ThemeWizard />
         <SetupWizard onDone={() => {}} />
         <Routes>

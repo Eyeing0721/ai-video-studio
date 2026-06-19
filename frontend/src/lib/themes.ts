@@ -15,7 +15,7 @@ export const PRESETS: Record<ThemePreset, ThemeConfig> = {
     name: '浅色模式',
     colors: { bg: '#F4F3F0', surface: '#FFFFFF', border: '#E5E0DA', text: '#2C2416', textSecondary: '#8C8378', accent: '#A47864', accentHover: '#8B6552', danger: '#D14343', success: '#4A9E6B' },
     radii: { sm: '4px', md: '8px', lg: '14px' },
-    blur: { sidebar: '12px', card: '8px', modal: '20px', panel: '4px' },
+    blur: { sidebar: '12px', card: '8px', modal: '20px', panel: '4px', background: '0px' },
     wallpaper: WALLPAPERS.light,
   },
   dark: {
@@ -57,7 +57,7 @@ export const PRESETS: Record<ThemePreset, ThemeConfig> = {
     name: '自定义',
     colors: { bg: '#F4F3F0', surface: '#FFFFFF', border: '#E5E0DA', text: '#2C2416', textSecondary: '#8C8378', accent: '#A47864', accentHover: '#8B6552', danger: '#D14343', success: '#4A9E6B' },
     radii: { sm: '4px', md: '8px', lg: '14px' },
-    blur: { sidebar: '12px', card: '8px', modal: '20px', panel: '4px' },
+    blur: { sidebar: '12px', card: '8px', modal: '20px', panel: '4px', background: '0px' },
     wallpaper: WALLPAPERS.light,
   },
 }
@@ -81,6 +81,7 @@ export function applyTheme(config: ThemeConfig) {
   root.style.setProperty('--blur-card', config.blur.card)
   root.style.setProperty('--blur-modal', config.blur.modal)
   root.style.setProperty('--blur-panel', config.blur.panel)
+  root.style.setProperty('--blur-background', config.blur.background)
   // Wallpaper
   document.body.style.backgroundImage = config.wallpaper
   document.body.style.backgroundSize = 'cover'
