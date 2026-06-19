@@ -11,7 +11,7 @@ DEFAULTS = {
     'deepseek_api_key': '',
     'deepseek_base_url': 'https://api.deepseek.com/anthropic',
     'bailian_api_key': '',
-    'output_dir': str(Path.home() / 'ai-video-studio-output'),
+    'output_dir': 'N:/ai-video-studio-output',
     'media_library_dir': str(Path.home() / 'ai-video-studio' / 'media_library'),
     'models': {
         'z_image': 'z_image_turbo_bf16.safetensors',
@@ -35,11 +35,16 @@ DEFAULTS = {
 }
 
 def load_config() -> dict:
+    cfg = dict(DEFAULTS)
     if CONFIG_FILE.exists():
         with open(CONFIG_FILE) as f:
-            saved = json.load(f)
-        return {**DEFAULTS, **saved}
-    return dict(DEFAULTS)
+            cfg.update(json.load(f))
+    # Local override (not committed)
+    local_file = Path(__file__).parent / 'config.local.json'
+    if local_file.exists():
+        with open(local_file) as f:
+            cfg.update(json.load(f))
+    return cfg
 
 def save_config(config: dict):
     with open(CONFIG_FILE, 'w') as f:

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './hooks/useThemeCtx'
 import Layout from './components/Layout'
 import ThemeWizard from './components/ThemeWizard'
+import SetupWizard from './components/SetupWizard'
 import Home from './pages/Home'
 import TextCreation from './pages/TextCreation'
 import Generate from './pages/Generate'
@@ -15,6 +16,7 @@ export default function App() {
     <ThemeProvider>
       <BrowserRouter>
         <ThemeWizard />
+        <SetupWizard onDone={() => {}} />
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />

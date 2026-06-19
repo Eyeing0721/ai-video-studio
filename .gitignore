@@ -9,3 +9,4 @@ dist/
 .vite/
 *.log
 .gstack/
+config.local.json
