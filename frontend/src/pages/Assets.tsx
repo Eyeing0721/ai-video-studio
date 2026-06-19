@@ -190,7 +190,7 @@ function AssetCard({ item, isPlaying, onPlay, onPreview }: {
 
   return (
     <div className="p-4 rounded-lg transition-all hover:scale-[1.01]"
-      style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', borderRadius: 'var(--theme-radius-md)' }}>
+      style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: 'var(--theme-radius-md)', opacity: 0.95 }}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs px-2 py-0.5 rounded font-medium"
           style={{ background: 'var(--theme-bg)', color: 'var(--theme-accent)' }}>{t}</span>
