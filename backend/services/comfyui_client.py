@@ -382,23 +382,47 @@ class ComfyUIClient:
         self,
         video_path: str,
         scale_factor: int = 4,
+        model_name: str = "4x-UltraSharp.pth",
+        frame_rate: int = 24,
     ) -> dict:
-        """Build a video upscale workflow using GAN x4."""
+        """Build a video upscale workflow using GAN x4.
+
+        Pipeline: UpscaleModelLoader -> VHS_LoadVideo -> ImageUpscaleWithModel -> VHS_VideoCombine
+        The video_path should be a filename accessible from ComfyUI's input directory.
+        """
+        load_model = self._node_id()
         load_video = self._node_id()
         upscaler = self._node_id()
-        save = self._node_id()
+        combine = self._node_id()
         return {
+            load_model: {
+                "class_type": "UpscaleModelLoader",
+                "inputs": {"model_name": model_name},
+            },
             load_video: {
                 "class_type": "VHS_LoadVideo",
-                "inputs": {"video": video_path, "force_rate": 0, "force_size": "Disabled"},
+                "inputs": {
+                    "video": video_path,
+                    "force_rate": 0,
+                    "force_size": "Disabled",
+                },
             },
             upscaler: {
                 "class_type": "ImageUpscaleWithModel",
-                "inputs": {"upscale_model": load_video, "images": [load_video, 0]},
+                "inputs": {
+                    "upscale_model": [load_model, 0],
+                    "images": [load_video, 0],
+                },
             },
-            save: {
-                "class_type": "SaveImage",
-                "inputs": {"filename_prefix": "avs_upscale", "images": [upscaler, 0]},
+            combine: {
+                "class_type": "VHS_VideoCombine",
+                "inputs": {
+                    "images": [upscaler, 0],
+                    "frame_rate": frame_rate,
+                    "format": "video/h264-mp4",
+                    "pix_fmt": "yuv420p",
+                    "filename_prefix": "avs_upscale",
+                },
             },
         }
 

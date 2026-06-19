@@ -72,3 +72,31 @@ class Shot(Base):
     last_frame_path: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="pending")
     attempts: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class PromptTemplate(Base):
+    """Learned prompt templates scraped from community sources (CivitAI, etc.)."""
+    __tablename__ = "prompt_templates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    category: Mapped[str] = mapped_column(String(64), default="general")
+    positive_prompt: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    negative_prompt: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tags_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON list of style tags
+    source: Mapped[str] = mapped_column(String(256), default="civitai")
+    score: Mapped[float] = mapped_column(Float, default=0.0)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
+
+
+class WorkflowTemplate(Base):
+    """ComfyUI workflow templates fetched from community sources."""
+    __tablename__ = "workflow_templates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(256), default="untitled")
+    model_type: Mapped[str] = mapped_column(String(64), default="unknown")
+    nodes_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    sanitized_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    compatible: Mapped[bool] = mapped_column(default=False)
+    imported_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)

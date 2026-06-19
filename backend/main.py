@@ -83,6 +83,13 @@ async def health():
     }
 
 
+@app.get("/api/health/detailed")
+async def health_detailed():
+    """Full environment health check covering all pipeline dependencies."""
+    from services.health_check import run_health_check
+    return await run_health_check()
+
+
 @app.get("/api/tasks")
 async def list_tasks():
     async with Session() as s:
