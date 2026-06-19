@@ -30,21 +30,22 @@ export default function Assets() {
   }, [])
 
   const getAudioUrl = (item: Record<string, unknown>) => {
-    // Use local media_library file served by backend
     const id = (item.id as string) || ''
-    // Map known BGM IDs to actual filenames
-    const FILE_MAP: Record<string, string> = {
+    // Known local files — use direct path
+    const LOCAL: Record<string, string> = {
       'bgm_epic_cinematic': 'epic_cinematic_total_war',
-      'bgm_powerful_motivational': 'inspirational_uplifting',
+      'bgm_inspirational_uplifting': 'inspirational_uplifting',
       'bgm_emotional_cinematic': 'emotional_cinematic_piano_strings',
       'bgm_upbeat_rock': 'upbeat_rock',
-      'pd_satie_gymnopedie': 'Satie-Gymnopedie-No1',
-      'pd_clair_de_lune': 'Debussy-Clair-de-Lune',
-      'pd_moonlight': 'Beethoven-Moonlight-1st',
-      'pd_cello_bach': 'Bach-Cello-Suite-1',
+      'bgm_cinematic_tension': 'inspirational_uplifting',
+      'bgm_powerful_motivational': 'inspirational_uplifting',
     }
-    const filename = FILE_MAP[id] || id.replace('bgm_', '').replace('pd_', '')
-    return `/media/bgm/${filename}.mp3`
+    const fn = LOCAL[id]
+    return fn ? `/media/bgm/${fn}.mp3` : ''
+  }
+
+  const hasLocalAudio = (item: Record<string, unknown>) => {
+    return !!LOCAL[(item.id as string) || '']
   }
 
   const togglePlay = (itemId: string, item: Record<string, unknown>) => {
@@ -199,11 +200,15 @@ function AssetCard({ item, isPlaying, onPlay, onPreview }: {
               <span className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                 {item.bpm ? `${item.bpm} BPM` : ''} {(item as BgmItem).duration_sec ? `${Math.round((item as BgmItem).duration_sec / 60)}:${String(Math.round((item as BgmItem).duration_sec % 60)).padStart(2, '0')}` : ''}
               </span>
-              <button onClick={onPlay}
-                className="w-7 h-7 rounded-full flex items-center justify-center transition-all"
-                style={{ background: isPlaying ? 'var(--theme-accent)' : 'var(--theme-bg)', color: isPlaying ? '#fff' : 'var(--theme-text-secondary)' }}>
-                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-              </button>
+              {hasLocalAudio(item as Record<string,unknown>) ? (
+                <button onClick={onPlay}
+                  className="w-7 h-7 rounded-full flex items-center justify-center transition-all"
+                  style={{ background: isPlaying ? 'var(--theme-accent)' : 'var(--theme-bg)', color: isPlaying ? '#fff' : 'var(--theme-text-secondary)' }}>
+                  {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                </button>
+              ) : (
+                <span className="text-xs opacity-40" style={{ color: 'var(--theme-text-secondary)' }}>无预览</span>
+              )}
             </>
           )}
           {t === 'SFX' && (

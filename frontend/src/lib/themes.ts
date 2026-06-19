@@ -5,8 +5,8 @@ const WALLPAPERS: Record<string, string> = {
   light: 'none',
   dark: 'none',
   mocha: 'none',
-  sakura: 'url(/media/wallpapers/sakura.png)',
-  synthwave: 'url(/media/wallpapers/synthwave.png)',
+  sakura: 'url(/media/wallpapers/sakura.jpg)',
+  synthwave: 'url(/media/wallpapers/synthwave.jpg)',
   tokyo: 'url(/media/wallpapers/tokyo.jpg)',
 }
 
