@@ -148,8 +148,8 @@ export default function SetupWizard({ onDone }: { onDone: () => void }) {
           </button>
           <button onClick={finish}
             className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white"
-            style={{ background: overall === 'ready' ? 'var(--theme-success)' : 'var(--theme-accent)', borderRadius: 'var(--theme-radius-md)', opacity: overall === 'blocked' ? 0.5 : 1 }}>
-            进入应用
+            style={{ background: overall === 'ready' ? 'var(--theme-success)' : 'var(--theme-accent)', borderRadius: 'var(--theme-radius-md)' }}>
+            {overall === 'ready' ? '进入应用' : '跳过检查，进入应用'}
           </button>
         </div>
       </div>
