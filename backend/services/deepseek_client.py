@@ -95,8 +95,15 @@ STORYBOARD_SYSTEM = """你是一位资深电影摄影师和分镜师。运用纪
 
 输出纯JSON数组，不要markdown包裹，不要额外文字。
 
+每个分镜新增english_prompt字段——用于AI图像生成模型的英文长提示词。格式要求：
+- 全部用英文，详细描述画面，包含所有角色外貌、衣着、场景、光影细节
+- 开头必须加画质修饰词：hyperrealistic, photorealistic, 8k, cinematic lighting, volumetric lighting, ray tracing, subsurface scattering, shallow depth of field, film grain, anamorphic lens, arri alexa, shot on 35mm
+- 结尾必须加统一风格词：dark atmospheric, moody cinematography, professional color grading, masterpiece, trending on artstation
+- 镜头类型对应修饰：close-up加skin texture/pores/细节，wide加epic scale/architectural/环境细节
+- 长度150-400个英文单词
+
 示例镜头：
-[{"id":1,"duration_sec":4.5,"shot_type":"wide","description":"从房间高处角落的视角俯瞰：一间约30平米的密闭房间，无窗无门。天花板中央垂下一根黑色电线，末端悬挂着一盏老式钨丝灯泡——灯丝已经发黑，发出不稳定的橙黄色光芒，每闪烁一次整个房间的阴影就跳动一下。房间正中央是一张直径约2米的深棕色圆木桌，桌面布满划痕和杯渍印迹。桌中央立着一尊约40厘米高的黄铜座钟，表盘珐琅已泛黄，繁复的卷草纹浮雕被铜绿侵蚀。十个衣着各异的男女围绕圆桌，有的脸贴在桌面上，有的仰头靠在椅背上，姿态瘫软如昏迷。一个身穿黑色羊毛西服、头戴山羊头面具的人站在桌旁——面具不是塑料制品，而是真的山羊头部标本，白色毛发已大片发黄，眼眶处是两个不规则的灰色空洞，露出里面人类的眼睛。","action":"钨丝灯闪烁，十个沉睡者无声呼吸，山羊头缓缓转动头部扫视众人","dialogue":"","mood":"压抑 诡异 窒息 潮湿 时间停滞","camera_motion":"slow_push_in","lighting":"单一钨丝灯泡顶光，2800K暖橙，浓重硬阴影，四个角落接近全黑，灰尘在光柱中缓慢飘浮"}]"""
+[{"id":1,"duration_sec":4.5,"shot_type":"wide","description":"从房间高处角落的视角俯瞰...（中文同前）","english_prompt":"hyperrealistic, photorealistic, 8k raw, cinematic lighting, volumetric lighting with visible dust particles in light beam, ray tracing global illumination, anamorphic lens flare, shot on Arri Alexa 65, 35mm film grain. Wide establishing shot from high corner angle of a sealed 30-square-meter room with no windows or doors. Peeling cream-colored lime plaster walls with gray concrete exposed at corners, 3-meter ceiling. Single flickering tungsten filament bulb hanging from black braided wire at center, casting unstable 2800K warm orange light that makes shadows jump with each flicker. Thick layer of dust motes dancing slowly in the light cone. Dark brown round wooden table 2 meters diameter at center, surface covered with scratches, cup rings, and decades of wear. Antique brass mantel clock 40cm tall at table center, enamel face yellowed with age, intricate acanthus leaf relief corroded by green patina. Ten men and women of various ages slumped around the table — some faces pressed against wood, others leaning back in chairs, all in deep unconsciousness. One figure stands beside the table: tall lean man in tailored black wool suit, wearing an actual taxidermied goat head as a mask — yellowed white fur matted and clumped, irregular gray eye holes revealing wet human eyes behind. Deep shadows in all four corners, almost black. dark atmospheric, moody cinematography, professional color grading, masterpiece, trending on artstation","action":"钨丝灯闪烁，十个沉睡者无声呼吸，山羊头缓缓转动头部扫视众人","dialogue":"","mood":"压抑 诡异 窒息 潮湿 时间停滞","camera_motion":"slow_push_in","lighting":"单一钨丝灯泡顶光，2800K暖橙，浓重硬阴影，四个角落接近全黑，灰尘在光柱中缓慢飘浮"}]"""
 
 
 STORYBOARD_USER = """请将以下小说拆解为分镜脚本，共{N}个分镜。

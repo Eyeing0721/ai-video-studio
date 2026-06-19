@@ -242,7 +242,7 @@ async def run_full_pipeline(
                 shot_path = output_dir / "shots" / f"{shot_dict['id']:03d}"
                 shot_path.mkdir(exist_ok=True)
 
-                prompt = f"{shot_dict['description']}, {shot_dict['mood']}, {shot_dict['lighting']}"
+                prompt = shot_dict.get('english_prompt') or f"{shot_dict['description']}, {shot_dict['mood']}, {shot_dict['lighting']}"
                 workflow = comfyui.build_txt2img_workflow(
                     positive_prompt=prompt,
                     width=GEN["z_image_width"],
@@ -256,20 +256,18 @@ async def run_full_pipeline(
                         backoff_sec=RETRY_BACKOFF_SEC,
                         label=f"Keyframe shot {shot_dict['id']}",
                     )
-                    # Output files land in ComfyUI output dir; copy to task output
-                    for node_id, outputs in result.get("outputs", {}).items():
-                        for out in outputs:
-                            if out.get("type") == "image":
-                                filename = out.get("filename", "")
+                    # Copy images from ComfyUI output → task dir + input dir
+                    for node_id, node_output in result.get("outputs", {}).items():
+                        for img in node_output.get("images", []):
+                            filename = img.get("filename", "")
+                            if filename:
                                 src = Path("F:/ComfyUI/output") / filename
                                 dst = shot_path / f"keyframe_{shot_dict['id']:03d}.png"
                                 if src.exists():
                                     shutil.copy2(src, dst)
                                     db_shot.keyframe_path = str(dst)
-                                    # Also copy to ComfyUI input for I2V step
                                     input_name = f"avs_shot_{task_id}_{shot_dict['id']:03d}.png"
                                     shutil.copy2(src, comfy_input_dir / input_name)
-                                    db_shot.first_frame_path = str(comfy_input / input_name)
                     db_shot.status = "keyframe_done"
                 except Exception as exc:
                     logger.error(f"Keyframe gen failed for shot {shot_dict['id']}: {exc}")
