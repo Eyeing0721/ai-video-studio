@@ -30,12 +30,21 @@ export default function Assets() {
   }, [])
 
   const getAudioUrl = (item: Record<string, unknown>) => {
-    // Use Pixabay CDN URL from API (works directly)
-    const url = (item as BgmItem).url
-    if (url) return url
-    // Fallback: try local file
+    // Use local media_library file served by backend
     const id = (item.id as string) || ''
-    return `/media/bgm/${id}.mp3`
+    // Map known BGM IDs to actual filenames
+    const FILE_MAP: Record<string, string> = {
+      'bgm_epic_cinematic': 'epic_cinematic_total_war',
+      'bgm_powerful_motivational': 'inspirational_uplifting',
+      'bgm_emotional_cinematic': 'emotional_cinematic_piano_strings',
+      'bgm_upbeat_rock': 'upbeat_rock',
+      'pd_satie_gymnopedie': 'Satie-Gymnopedie-No1',
+      'pd_clair_de_lune': 'Debussy-Clair-de-Lune',
+      'pd_moonlight': 'Beethoven-Moonlight-1st',
+      'pd_cello_bach': 'Bach-Cello-Suite-1',
+    }
+    const filename = FILE_MAP[id] || id.replace('bgm_', '').replace('pd_', '')
+    return `/media/bgm/${filename}.mp3`
   }
 
   const togglePlay = (itemId: string, item: Record<string, unknown>) => {
