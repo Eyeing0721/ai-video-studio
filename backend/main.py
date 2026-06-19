@@ -354,6 +354,12 @@ async def list_title_formulas():
     from services.content_toolkit import TITLE_FORMULAS
     return TITLE_FORMULAS
 
+@app.get("/api/resources")
+async def list_resources(type: str = ""):
+    from services.content_toolkit import get_resource_sites, MEGA_PACKS
+    return {"sites": get_resource_sites(type), "mega_packs": MEGA_PACKS}
+
+
 @app.get("/api/recommend/styles")
 async def recommend_styles(template: str = "vlog"):
     from services.content_toolkit import recommend_fonts, recommend_vfx

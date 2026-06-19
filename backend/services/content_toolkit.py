@@ -550,6 +550,123 @@ def get_subtitle_rules(platform: str) -> dict:
     return SUBTITLE_RULES.get(platform, SUBTITLE_RULES["youtube_16_9"])
 
 
+# ── Chinese Creator Resource Directory ─────────────────────
+
+RESOURCE_SITES: list[dict] = [
+    {
+        "id": "res_ysjf",
+        "name": "飓风素材库",
+        "name_en": "YingShiJuFeng Material Library",
+        "url": "https://www.ysjf.com",
+        "type": ["video", "sfx", "lut", "template"],
+        "license": "免费可商用 (个人学习/个人商用/企业商用)",
+        "quality": "4K/8K Dolby Vision",
+        "note": "影视飓风团队全球实拍素材，RED/DJI专业设备",
+    },
+    {
+        "id": "res_newcger",
+        "name": "新CG儿",
+        "url": "https://www.newcger.com",
+        "type": ["ae_template", "lut", "preset"],
+        "license": "免费，免注册免登录",
+        "note": "高质量AE模板，达芬奇预设和LUT",
+    },
+    {
+        "id": "res_lookae",
+        "name": "大众脸 LookAE",
+        "url": "https://www.lookae.com",
+        "type": ["plugin", "template", "preset", "sfx"],
+        "license": "基本免费",
+        "note": "AE/PR/FCPX/达芬奇每日更新",
+    },
+    {
+        "id": "res_aigei",
+        "name": "爱给网",
+        "url": "https://www.aigei.com",
+        "type": ["sfx", "music", "template", "3d", "tutorial"],
+        "license": "CC0/CC-BY (需查看具体协议)",
+        "note": "100万+音效，综合免费素材站。普通用户每日1个下载",
+    },
+    {
+        "id": "res_vjshi",
+        "name": "VJ师/光厂",
+        "url": "https://www.vjshi.com",
+        "type": ["video", "sfx", "music", "template"],
+        "license": "付费 (V币素材可商用，音效每日5条免费)",
+        "note": "国内最大正版视频素材平台，50万+素材",
+    },
+    {
+        "id": "res_xinpianchang",
+        "name": "新片场",
+        "url": "https://stock.xinpianchang.com",
+        "type": ["video"],
+        "license": "付费商用 (个人会员HD免费)",
+        "note": "4K正版视频素材，部分App端免费",
+    },
+    {
+        "id": "res_bilibili",
+        "name": "B站必剪",
+        "url": "https://bcut.bilibili.cn",
+        "type": ["software", "sfx", "music", "template", "subtitle"],
+        "license": "免费",
+        "note": "B站官方免费剪辑软件，内置素材库（音效/音乐/字幕/特效/封面模板）",
+    },
+    {
+        "id": "res_prmuban",
+        "name": "PR模板网",
+        "url": "https://www.prmuban.com",
+        "type": ["template", "lut", "transition", "sfx"],
+        "license": "免费",
+        "note": "PR/达芬奇/FCPX全覆盖",
+    },
+    {
+        "id": "res_cgtimo",
+        "name": "CG天模",
+        "url": "https://www.cgtimo.com",
+        "type": ["mega_pack", "template", "sfx", "lut"],
+        "license": "部分免费",
+        "note": "大型素材合集包 (10-40GB+)",
+    },
+]
+
+MEGA_PACKS: list[dict] = [
+    {
+        "id": "pack_luxusio",
+        "name": "Luxusio Ultimate Editing Pack",
+        "size": "40GB+",
+        "contents": "1250音效, 500字体, 7 LUT, 820+叠加层, 530+视频片段, 500+纹理",
+        "url": "B站/myssc.net",
+    },
+    {
+        "id": "pack_super_creators_v7",
+        "name": "Super Creators Pack V7",
+        "size": "7800+ elements",
+        "contents": "文字标题字幕条, 无缝转场, LUT调色, 光效叠加, 音效",
+        "software": "达芬奇专用",
+    },
+    {
+        "id": "pack_four_editors",
+        "name": "Four Editors Platinum Bundle",
+        "size": "10.2GB / 7000+ elements",
+        "contents": "2400+音效, 2600+LUT, 1000+转场, 750+叠加层纹理",
+    },
+]
+
+
+def get_resource_sites(resource_type: str = "") -> list[dict]:
+    if not resource_type:
+        return RESOURCE_SITES
+    return [r for r in RESOURCE_SITES if resource_type in r["type"]]
+
+
+def get_blend_mode(vfx_id: str) -> str:
+    return BLEND_RULES.get(vfx_id, "normal, opacity 50%")
+
+
+def get_subtitle_rules(platform: str) -> dict:
+    return SUBTITLE_RULES.get(platform, SUBTITLE_RULES["youtube_16_9"])
+
+
 def get_cover_template(platform: str) -> dict:
     mapping = {
         "youtube": "cover_youtube_standard",
