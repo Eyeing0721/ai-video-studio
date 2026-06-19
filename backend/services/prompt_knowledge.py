@@ -12,6 +12,28 @@ All techniques learned from:
 
 # ── Core Style: Hyperrealistic ───────────────────────────
 
+FIRST_FRAME_RULE = """
+CRITICAL: FIRST-FRAME PRINCIPLE (MANDATORY FOR ALL prompt_image FIELDS)
+
+The generated image will be used as the FIRST FRAME for video generation.
+Therefore, the image MUST capture the MOMENT BEFORE the main action — the tension, the anticipation, the setup.
+
+VIDEO ACTION → IMAGE (FIRST FRAME):
+- Head smashing on table → Head still raised, about to descend; muscles tensed, victim's eyes wide with terror
+- Water droplet splashing → Droplet still hanging from the bulb, surface tension at breaking point
+- Bubble bursting → Bubble fully intact, iridescent surface at maximum tension
+- Door slamming open → Door still closed, hand reaching for handle
+- Blood splattering → Object still mid-air, trajectory aimed, blood still contained
+- Character collapsing → Character still standing, knees beginning to buckle
+- Glass shattering → Glass intact, crack just beginning to form
+- Scream/Shout → Mouth closed or just beginning to open, inhale visible in throat
+- Punch landing → Fist still traveling, target's guard still up
+- Explosion → Fuse still burning, last spark before ignition
+
+Think like a film director: the STILL image is the SETUP. The VIDEO is the PAYOFF.
+Every prompt_image must describe a moment of POTENTIAL ENERGY — not kinetic release.
+"""
+
 HYPERREALISTIC_STANDARD = """
 HYPERREALISTIC PHOTOGRAPHY PROTOCOL (MANDATORY FOR ALL SHOTS):
 
@@ -94,6 +116,8 @@ CONTRA-INDICATED: CFG > 2 causes artifacts and 10x slowdown. Never use high CFG 
 def get_prompt_knowledge() -> str:
     """Return consolidated knowledge for injection into the AI storyboard prompt."""
     return f"""
+{FIRST_FRAME_RULE}
+
 {PROMPT_FORMULA}
 
 {HYPERREALISTIC_STANDARD}
