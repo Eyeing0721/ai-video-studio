@@ -578,7 +578,7 @@ class ComfyUIClient:
                 "class_type": "LTXVCropGuides",
                 "inputs": {
                     "positive": [condition, 0], "negative": [condition, 1],
-                    "latent": [img2video_init, 1],
+                    "latent": [separate1, 0],
                 },
             },
 
@@ -646,7 +646,7 @@ class ComfyUIClient:
                 "inputs": {
                     "strength": 1, "bypass": [p_bypass, 0],
                     "vae": [vae, 0], "image": [preprocess, 0],
-                    "latent": [latent_upscaler, 1],
+                    "latent": [latent_upscaler, 0],
                 },
             },
 
