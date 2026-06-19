@@ -45,15 +45,11 @@ export default function ThemeWizard() {
               return (
                 <button
                   key={key}
-                  onClick={() => {
-                    switchPreset(key)
-                    setStep(1)
-                  }}
-                  className="p-3 rounded-lg text-sm font-medium transition-all hover:scale-105"
+                  onClick={() => { switchPreset(key); setStep(1) }}
+                  className="p-3 rounded-lg text-sm font-medium transition-all hover:scale-105 glass-card"
                   style={{
-                    background: t.colors.surface,
+                    background: `linear-gradient(135deg, ${t.colors.accent}55, ${t.colors.surface}dd, ${t.colors.bg})`,
                     color: t.colors.text,
-                    border: `2px solid ${t.colors.border}`,
                     borderRadius: 'var(--theme-radius-md)',
                   }}
                 >
