@@ -92,12 +92,20 @@ _workflow_fetcher_task = None
 
 # ── Static media files ────────────────────────────────
 
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import os as _os
-_media_dir = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', 'media_library'))
-if _os.path.isdir(_media_dir):
-    app.mount("/media", StaticFiles(directory=_media_dir), name="media")
-    logger.info(f"Media served from: {_media_dir}")
+MEDIA_ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', 'media_library'))
+logger.info(f"Media root: {MEDIA_ROOT}")
+
+@app.get("/media/{subpath:path}")
+async def serve_media(subpath: str):
+    """Serve static media files from media_library/"""
+    file_path = _os.path.join(MEDIA_ROOT, subpath)
+    if not _os.path.abspath(file_path).startswith(_os.path.abspath(MEDIA_ROOT)):
+        return {"detail": "Forbidden"}, 403
+    if _os.path.isfile(file_path):
+        return FileResponse(file_path)
+    return {"detail": "Not Found"}, 404
 
 
 # ── Routes ──────────────────────────────────────────────

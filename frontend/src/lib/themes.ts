@@ -83,9 +83,6 @@ export function applyTheme(config: ThemeConfig) {
   root.style.setProperty('--blur-panel', config.blur.panel)
   // Wallpaper
   root.style.setProperty('--wallpaper', `url(${config.wallpaper})`)
-  root.style.backgroundImage = `url(${config.wallpaper})`
-  root.style.backgroundSize = 'cover'
-  root.style.backgroundAttachment = 'fixed'
 
   const isDark = ['dark', 'synthwave', 'tokyo-night'].includes(config.name)
   document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'

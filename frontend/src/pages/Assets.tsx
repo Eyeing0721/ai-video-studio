@@ -114,7 +114,7 @@ export default function Assets() {
 
       {/* LUT Preview Modal */}
       {previewLut && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
           onClick={() => setPreviewLut(null)}>
           <div className="glass-strong p-6 rounded-2xl max-w-lg w-full" onClick={e => e.stopPropagation()}
             style={{ borderRadius: 'var(--theme-radius-lg)' }}>
