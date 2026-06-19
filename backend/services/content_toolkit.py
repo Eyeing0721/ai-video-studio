@@ -470,6 +470,43 @@ VFX_RULES = {
 }
 
 
+# ── Working Editing Workflow (from research) ──────────────
+
+EDITING_WORKFLOW = {
+    "name": "专业视频剪辑全流程",
+    "steps": [
+        {"order": 1, "name": "熟悉素材", "desc": "通看素材1-2遍，了解摄影师拍摄内容"},
+        {"order": 2, "name": "整理思路", "desc": "结合剧本确定剪辑架构，与导演讨论"},
+        {"order": 3, "name": "镜头分类筛选", "desc": "按场景/戏份分类到不同文件夹"},
+        {"order": 4, "name": "粗剪", "desc": "按戏份场景拼接，挑选合适镜头，搭故事框架"},
+        {"order": 5, "name": "精剪", "desc": "调整节奏和氛围，减掉拖沓段落，强化情绪"},
+        {"order": 6, "name": "配乐与音效", "desc": "合适配乐决定影片风格，音效增加层次感"},
+        {"order": 7, "name": "字幕与特效", "desc": "添加字幕，制作片头片尾特效"},
+        {"order": 8, "name": "调色", "desc": "颜色统一校正+风格调色，专业调色师完成"},
+        {"order": 9, "name": "渲染输出", "desc": "导出视频成片，选择合适编码和分辨率"},
+    ],
+}
+
+# ── Audio Processing Learning (Vocal Tuning) ──────────────
+
+VOCAL_TUNING_GUIDE = {
+    "tools": {
+        "melodyne": {"level": "beginner", "best_for": "大幅修音、快捷键高效", "key_shortcuts": {"A": "选择/移动音高", "S": "切分音符", "C": "快速吸附", "W": "呼吸音量", "Tab": "拉平长音", "Q": "颤音幅度"}},
+        "autotune": {"level": "advanced", "best_for": "出版级微调、专业制作"},
+        "waves_tune": {"level": "intermediate", "best_for": "操作简单、音质好"},
+    },
+    "workflow": [
+        "定调（测调工具：AutoKey/KeyFinder/CrispyTune）",
+        "修音高（拖拽到正确音高）",
+        "修尾音（滑音自然过渡）",
+        "修滑音",
+        "保留情绪（不过度修正语气词和呼吸）",
+        "导出新音频用于混音",
+    ],
+    "key_detection_tools": ["Melodyne自带识别", "Auto-Key", "KeyFinder", "Find the BPM and key for any song (tunebat.com)"],
+}
+
+
 def recommend_fonts(template_id: str) -> dict:
     return FONT_RULES.get(template_id, FONT_RULES["Vlog"])
 
