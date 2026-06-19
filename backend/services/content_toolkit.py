@@ -485,6 +485,71 @@ def generate_title(style: str, context: dict) -> str:
     return formula["template"].format(**context) if context else formula["example"]
 
 
+# ── Platform-Specific Subtitle Rules ───────────────────────
+
+SUBTITLE_RULES: dict[str, dict] = {
+    "youtube_16_9": {
+        "safe_zone": "bottom 1/3, 8-10% margin from bottom",
+        "font_size_pt": 46,
+        "max_chars_per_line": 35,
+        "max_lines": 2,
+        "ui_avoidance": "progress bar at bottom: keep 10% bottom margin",
+    },
+    "douyin_9_16": {
+        "safe_zone": "center 60-70% height",
+        "danger_top": "top 15-25% (search, hashtags, username)",
+        "danger_bottom": "bottom 20-25% (caption, likes, comments, share)",
+        "font_size_pt": 60,
+        "max_chars_per_line": 15,
+        "max_lines": 3,
+        "side_margins": "10% left/right",
+    },
+    "bilibili_16_9": {
+        "safe_zone": "bottom 1/3",
+        "font_size_pt": 42,
+        "max_chars_per_line": 35,
+        "max_lines": 2,
+    },
+}
+
+# ── Blend Mode Rules for VFX ──────────────────────────────
+
+BLEND_RULES: dict[str, str] = {
+    "film_grain": "overlay, opacity 15-40%",
+    "dust_scratches": "overlay, opacity 20-50%",
+    "light_leak": "screen or add, opacity 30-60%",
+    "lens_flare": "screen or add, opacity 40-70%",
+    "fog_mist": "screen, opacity 20-40%",
+    "snow_particles": "screen, opacity 40-70%",
+    "fire_sparkle": "screen or add, opacity 50-70%",
+    "glitch_rgb": "normal, opacity 50-80%",
+    "vhs_retro": "normal, opacity 50-80%",
+    "vignette": "multiply, opacity 20-40%",
+}
+
+# ── Thumbnail Pre-Publish Checklist ───────────────────────-
+
+THUMBNAIL_CHECKLIST: list[str] = [
+    "分辨率正确 (YouTube: 1280x720, 抖音: 1080x1920)",
+    "手机缩略图尺寸下仍然可读 (160px宽测试)",
+    "1-4个粗体大字，笔画清晰",
+    "文字-背景对比度 ≥ 4.5:1",
+    "一个明确的视觉焦点 (人脸/物体/瞬间)",
+    "右下角/边角无关键元素 (时长标签/UI遮挡)",
+    "缩略图+标题产生好奇心缺口 (不是重复内容)",
+    "灰度模式下仍然层次分明",
+    "情绪表达真实 (非夸张clickbait脸)",
+]
+
+
+def get_blend_mode(vfx_id: str) -> str:
+    return BLEND_RULES.get(vfx_id, "normal, opacity 50%")
+
+
+def get_subtitle_rules(platform: str) -> dict:
+    return SUBTITLE_RULES.get(platform, SUBTITLE_RULES["youtube_16_9"])
+
+
 def get_cover_template(platform: str) -> dict:
     mapping = {
         "youtube": "cover_youtube_standard",
