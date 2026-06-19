@@ -16,8 +16,10 @@ export default function SetupWizard({ onDone }: { onDone: () => void }) {
   const [overall, setOverall] = useState<'checking' | 'ready' | 'blocked'>('checking')
 
   useEffect(() => {
-    const seen = localStorage.getItem('avs-setup-done')
-    if (seen) { onDone(); return }
+    const themeDone = localStorage.getItem('ai-video-studio-wizard-done')
+    const setupDone = localStorage.getItem('avs-setup-done')
+    if (setupDone) { onDone(); return }
+    if (!themeDone) return  // wait for theme wizard to finish first
     runChecks()
   }, [])
 

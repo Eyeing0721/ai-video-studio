@@ -4,8 +4,30 @@ import { PRESETS, applyTheme } from '../lib/themes'
 
 const STORAGE_KEY = 'ai-video-studio-theme'
 
+function getInitialPreset(): ThemePreset {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) return JSON.parse(saved).preset || 'light'
+  } catch { /* ignore */ }
+  return 'light'
+}
+function getInitialConfig(): ThemeConfig {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      if (parsed.preset === 'custom' && parsed.config) return parsed.config
+      if (PRESETS[parsed.preset as ThemePreset]) return PRESETS[parsed.preset as ThemePreset]
+    }
+  } catch { /* ignore */ }
+  return PRESETS.light
+}
+// Apply theme immediately before first render
+const _initConfig = getInitialConfig()
+applyTheme(_initConfig)
+
 export function useTheme() {
-  const [preset, setPreset] = useState<ThemePreset>(() => {
+  const [preset, setPreset] = useState<ThemePreset>(getInitialPreset)
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
