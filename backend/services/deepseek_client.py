@@ -94,7 +94,11 @@ async def generate_storyboard(
         r.raise_for_status()
         data = r.json()
 
-    content = data["content"][0]["text"] if isinstance(data["content"], list) else data["content"]
+    if isinstance(data["content"], list):
+        text_blocks = [b for b in data["content"] if b.get("type") == "text"]
+        content = text_blocks[0]["text"] if text_blocks else data["content"][0].get("text", "")
+    else:
+        content = data["content"]
 
     # Parse JSON from response — strip markdown wrappers if present
     content = content.strip()
@@ -277,7 +281,11 @@ async def auto_edit_instruction(
         r.raise_for_status()
         data = r.json()
 
-    content = data["content"][0]["text"] if isinstance(data["content"], list) else data["content"]
+    if isinstance(data["content"], list):
+        text_blocks = [b for b in data["content"] if b.get("type") == "text"]
+        content = text_blocks[0]["text"] if text_blocks else data["content"][0].get("text", "")
+    else:
+        content = data["content"]
     content = content.strip()
     if content.startswith("```"):
         content = content.split("\n", 1)[1]

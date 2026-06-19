@@ -126,6 +126,19 @@ export default function Settings() {
             </>
           )}
 
+          {/* Blur controls — available for ALL themes */}
+          <div>
+            <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--theme-text)' }}>模糊强度</h3>
+            {(['sidebar','card','modal','panel','background'] as const).map(k => (
+              <label key={k} className="flex items-center gap-2 text-sm mb-2" style={{ color: 'var(--theme-text-secondary)' }}>
+                <span className="w-16">{{sidebar:'侧栏',card:'卡片',modal:'弹窗',panel:'面板',background:'背景'}[k]}</span>
+                <input type="range" min="0" max="32" value={parseInt(config.blur?.[k] || '0')} onChange={e => updateCustom({...config, blur:{...config.blur, [k]:`${e.target.value}px`}})}
+                  className="flex-1" />
+                <span className="w-8 text-xs">{config.blur?.[k] || '0px'}</span>
+              </label>
+            ))}
+          </div>
+
           <div className="flex gap-3">
             <button
               onClick={() => {

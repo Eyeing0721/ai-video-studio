@@ -39,7 +39,7 @@ export default function Layout() {
           </NavLink>
         ))}
       </nav>
-      <main className="flex-1 overflow-auto p-6">
+      <main className="flex-1 overflow-auto p-6" style={{ position: 'relative', zIndex: 1 }}>
         <div className="page-enter" key={location.pathname}>
           <Outlet />
         </div>
