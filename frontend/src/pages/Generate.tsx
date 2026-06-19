@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const API = 'http://127.0.0.1:8000'
@@ -19,6 +19,8 @@ export default function Generate() {
   const [maxDuration, setMaxDuration] = useState(120)
   const [voiceId, setVoiceId] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [fileName, setFileName] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const nav = useNavigate()
 
   useEffect(() => {
@@ -76,11 +78,54 @@ export default function Generate() {
         </div>
 
         {mode === 'upload' ? (
-          <div className="p-12 rounded-lg text-center border-2 border-dashed cursor-pointer"
-            style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', borderRadius: 'var(--theme-radius-lg)' }}>
-            <p style={{ color: 'var(--theme-text-secondary)' }}>拖拽文件到此处，或点击选择</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--theme-text-secondary)' }}>支持 .txt / .md</p>
-          </div>
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.md"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setFileName(file.name)
+                const reader = new FileReader()
+                reader.onload = () => {
+                  setText(reader.result as string)
+                }
+                reader.readAsText(file)
+              }}
+            />
+            <div
+              className="p-12 rounded-lg text-center border-2 border-dashed cursor-pointer hover:opacity-80 transition-opacity"
+              style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', borderRadius: 'var(--theme-radius-lg)' }}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault()
+                const file = e.dataTransfer.files?.[0]
+                if (!file) return
+                if (!file.name.endsWith('.txt') && !file.name.endsWith('.md')) return
+                setFileName(file.name)
+                const reader = new FileReader()
+                reader.onload = () => {
+                  setText(reader.result as string)
+                }
+                reader.readAsText(file)
+              }}
+            >
+              {fileName ? (
+                <>
+                  <p className="text-sm font-medium" style={{ color: 'var(--theme-text)' }}>{fileName}</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--theme-text-secondary)' }}>点击重新选择，或切换到粘贴模式查看文本</p>
+                </>
+              ) : (
+                <>
+                  <p style={{ color: 'var(--theme-text-secondary)' }}>拖拽文件到此处，或点击选择</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--theme-text-secondary)' }}>支持 .txt / .md</p>
+                </>
+              )}
+            </div>
+          </>
         ) : (
           <textarea value={text} onChange={(e) => setText(e.target.value)}
             placeholder="输入/粘贴小说文本或一句话描述..." className="w-full p-4 rounded-lg resize-none text-sm" rows={10}

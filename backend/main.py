@@ -6,12 +6,13 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from config import config
 from models.task import Base
+from services import prompt_learner, workflow_fetcher
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("avs")
@@ -43,10 +44,24 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
+    global _prompt_learner_task, _workflow_fetcher_task
     await init_db()
     output_dir = Path(config["output_dir"])
     output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "uploads").mkdir(parents=True, exist_ok=True)
     logger.info(f"AI Video Studio started. Output dir: {output_dir}")
+
+    # Start background services
+    _prompt_learner_task = prompt_learner.start(Session)
+    _workflow_fetcher_task = workflow_fetcher.start(Session)
+    logger.info("Background services started: prompt_learner, workflow_fetcher")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    prompt_learner.stop()
+    workflow_fetcher.stop()
+    logger.info("Background services stopped")
 
 
 # ── WebSocket connections ───────────────────────────────
@@ -70,6 +85,10 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+# Background service task handles
+_prompt_learner_task = None
+_workflow_fetcher_task = None
+
 
 # ── Routes ──────────────────────────────────────────────
 
@@ -89,6 +108,55 @@ async def health_detailed():
     from services.health_check import run_health_check
     return await run_health_check()
 
+
+# ── File Upload ──────────────────────────────────────────
+
+ALLOWED_EXTENSIONS = {
+    ".txt", ".md", ".json", ".yaml", ".yml", ".csv", ".xml", ".html",
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg",
+    ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac",
+}
+
+TEXT_EXTS = {".txt", ".md", ".json", ".yaml", ".yml", ".csv", ".xml", ".html"}
+IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"}
+AUDIO_EXTS = {".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac"}
+
+
+def _file_type(ext: str) -> str:
+    if ext in TEXT_EXTS:
+        return "text"
+    if ext in IMAGE_EXTS:
+        return "image"
+    if ext in AUDIO_EXTS:
+        return "audio"
+    return "unknown"
+
+
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return {"error": f"File type '{ext}' not allowed."}
+
+    uploads_dir = Path(config["output_dir"]) / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+
+    # Avoid collisions by prefixing with a short uuid
+    safe_name = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+    dest = uploads_dir / safe_name
+
+    contents = await file.read()
+    dest.write_bytes(contents)
+
+    return {
+        "filename": file.filename,
+        "path": str(dest),
+        "type": _file_type(ext),
+        "size": len(contents),
+    }
+
+
+# ── Tasks ───────────────────────────────────────────────
 
 @app.get("/api/tasks")
 async def list_tasks():

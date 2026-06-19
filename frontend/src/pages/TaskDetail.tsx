@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import useWebSocket from '../hooks/useWebSocket'
 
 const API = 'http://127.0.0.1:8000'
 
@@ -45,7 +46,22 @@ export default function TaskDetail() {
   const { id } = useParams()
   const [task, setTask] = useState<TaskData | null>(null)
   const [logs, setLogs] = useState<string[]>([])
-  const wsRef = useRef<WebSocket | null>(null)
+
+  const { connected } = useWebSocket({
+    taskId: id!,
+    onMessage: (msg) => {
+      if (msg.type === 'status') {
+        setTask((prev) => prev ? { ...prev, status: msg.status as string, progress: msg.progress as number } : prev)
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg.label} (${Math.round(msg.progress as number)}%)`])
+      } else if (msg.type === 'completed') {
+        setTask((prev) => prev ? { ...prev, status: 'completed', progress: 100 } : prev)
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] 任务完成`])
+      } else if (msg.type === 'failed') {
+        setTask((prev) => prev ? { ...prev, status: 'failed' } : prev)
+        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] 失败: ${msg.error}`])
+      }
+    },
+  })
 
   useEffect(() => {
     fetch(`${API}/api/tasks/${id}`)
@@ -54,25 +70,6 @@ export default function TaskDetail() {
         if (data.id) setTask(data)
       })
       .catch(() => {})
-
-    const ws = new WebSocket(`ws://127.0.0.1:8000/ws/tasks/${id}`)
-    wsRef.current = ws
-
-    ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data)
-      if (msg.type === 'status') {
-        setTask((prev) => prev ? { ...prev, status: msg.status, progress: msg.progress } : prev)
-        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg.label} (${Math.round(msg.progress)}%)`])
-      } else if (msg.type === 'completed') {
-        setTask((prev) => prev ? { ...prev, status: 'completed', progress: 100 } : prev)
-        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] 任务完成`])
-      } else if (msg.type === 'failed') {
-        setTask((prev) => prev ? { ...prev, status: 'failed' } : prev)
-        setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] 失败: ${msg.error}`])
-      }
-    }
-
-    return () => { ws.close() }
   }, [id])
 
   if (!task) return <p style={{ color: 'var(--theme-text-secondary)' }}>加载中...</p>
