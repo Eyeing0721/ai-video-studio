@@ -645,7 +645,7 @@ LUT_CATALOG: list[dict] = [
         "color_temp": "mixed",
         "contrast": "high",
         "use_case": ["微短剧", "预告片", "电影感内容"],
-        "url": "",
+        "url": "https://freshluts.com",
         "bundled": False,
     },
     {
@@ -657,7 +657,7 @@ LUT_CATALOG: list[dict] = [
         "color_temp": "cool",
         "contrast": "high",
         "use_case": ["合成波风格", "夜拍", "都市内容"],
-        "url": "",
+        "url": "https://freshluts.com",
         "bundled": False,
     },
     {
@@ -669,7 +669,7 @@ LUT_CATALOG: list[dict] = [
         "color_temp": "warm",
         "contrast": "low",
         "use_case": ["纪录片", "回忆段落", "文艺Vlog"],
-        "url": "",
+        "url": "https://cinecolor.io/collections/free-luts",
         "bundled": False,
     },
     {
@@ -681,7 +681,7 @@ LUT_CATALOG: list[dict] = [
         "color_temp": "slightly_warm",
         "contrast": "low",
         "use_case": ["和风主题", "旅行Vlog", "文艺内容"],
-        "url": "",
+        "url": "https://www.fujifilm-x.com/global/support/download/lut/",
         "bundled": False,
     },
     {
@@ -693,7 +693,7 @@ LUT_CATALOG: list[dict] = [
         "color_temp": "neutral",
         "contrast": "medium",
         "use_case": ["自然纪录片", "户外Vlog", "旅行"],
-        "url": "",
+        "url": "https://freshluts.com",
         "bundled": False,
     },
     {
@@ -705,7 +705,7 @@ LUT_CATALOG: list[dict] = [
         "color_temp": "bw",
         "contrast": "high",
         "use_case": ["严肃题材", "纪录片采访", "艺术短片"],
-        "url": "",
+        "url": "https://cinecolor.io/collections/free-luts",
         "bundled": False,
     },
 ]

@@ -290,6 +290,21 @@ async def list_luts():
     from services.bgm_library import LUT_CATALOG
     return LUT_CATALOG
 
+@app.post("/api/audio/analyze")
+async def analyze_audio(file: UploadFile):
+    """Analyze an uploaded audio file: BPM, key, energy, beat positions."""
+    import tempfile
+    from services.audio_analyzer import analyze
+    suffix = Path(file.filename).suffix if file.filename else ".wav"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
+    try:
+        result = analyze(tmp_path)
+        return result
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
 
 # ── Text Creation ──────────────────────────────────────
 
