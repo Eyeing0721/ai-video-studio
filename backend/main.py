@@ -327,6 +327,43 @@ async def audio_presets():
     return AUDIO_PRESETS
 
 
+# ── Content Toolkit ────────────────────────────────────
+
+@app.get("/api/fonts")
+async def list_fonts():
+    from services.content_toolkit import FONT_CATALOG
+    return FONT_CATALOG
+
+@app.get("/api/vfx")
+async def list_vfx():
+    from services.content_toolkit import VFX_CATALOG
+    return VFX_CATALOG
+
+@app.get("/api/titles")
+async def list_title_templates():
+    from services.content_toolkit import TITLE_TEMPLATES
+    return TITLE_TEMPLATES
+
+@app.get("/api/covers")
+async def list_cover_templates(platform: str = "youtube"):
+    from services.content_toolkit import get_cover_template
+    return get_cover_template(platform)
+
+@app.get("/api/copywriting")
+async def list_title_formulas():
+    from services.content_toolkit import TITLE_FORMULAS
+    return TITLE_FORMULAS
+
+@app.get("/api/recommend/styles")
+async def recommend_styles(template: str = "vlog"):
+    from services.content_toolkit import recommend_fonts, recommend_vfx
+    return {
+        "template": template,
+        "fonts": recommend_fonts(template),
+        "vfx": recommend_vfx(template),
+    }
+
+
 # ── Text Creation ──────────────────────────────────────
 
 @app.post("/api/text/continue")
