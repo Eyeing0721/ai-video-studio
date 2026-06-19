@@ -1,9 +1,10 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { Film, FileText, ListTodo, FolderOpen, Settings } from 'lucide-react'
+import { Film, FileText, ListTodo, FolderOpen, Settings, Briefcase } from 'lucide-react'
 
 const NAV = [
   { to: '/', label: '首页', icon: Film },
   { to: '/text', label: '文本创作', icon: FileText },
+  { to: '/career', label: '求职工具', icon: Briefcase },
   { to: '/generate', label: '一键成片', icon: Film },
   { to: '/tasks', label: '任务', icon: ListTodo },
   { to: '/assets', label: '资产库', icon: FolderOpen },

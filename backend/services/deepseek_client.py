@@ -157,7 +157,7 @@ async def generate_storyboard(
         "max_tokens": 65536,
         "system": STORYBOARD_SYSTEM,
         "messages": [{"role": "user", "content": user_msg}],
-        "thinking": {"type": "enabled", "budget_tokens": THINKING_BUDGET},
+        "thinking": {"type": "disabled"},
         "temperature": TEMPERATURE,
     }
 

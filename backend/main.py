@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from config import config
 from models.task import Base
 from services import prompt_learner, workflow_fetcher
+from routes.career_routes import router as career_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("avs")
@@ -40,6 +41,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(career_router)
 
 
 @app.on_event("startup")

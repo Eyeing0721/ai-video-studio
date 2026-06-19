@@ -5,6 +5,7 @@ import ThemeWizard from './components/ThemeWizard'
 import SetupWizard from './components/SetupWizard'
 import Home from './pages/Home'
 import TextCreation from './pages/TextCreation'
+import Career from './pages/Career'
 import Generate from './pages/Generate'
 import Tasks from './pages/Tasks'
 import TaskDetail from './pages/TaskDetail'
@@ -22,6 +23,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/text" element={<TextCreation />} />
+            <Route path="/career" element={<Career />} />
             <Route path="/generate" element={<Generate />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/tasks/:id" element={<TaskDetail />} />
