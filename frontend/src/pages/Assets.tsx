@@ -30,12 +30,12 @@ export default function Assets() {
   }, [])
 
   const getAudioUrl = (item: Record<string, unknown>) => {
-    // Prefer local media_library file served via backend
-    const name = (item.name as string) || ''
+    // Use Pixabay CDN URL from API (works directly)
+    const url = (item as BgmItem).url
+    if (url) return url
+    // Fallback: try local file
     const id = (item.id as string) || ''
-    // Check if we have this as a local file
-    const localPath = `/media/bgm/${name.replace(/[^a-zA-Z0-9_-]/g, '_')}.mp3`
-    return localPath  // Will 404 if not found, that's OK
+    return `/media/bgm/${id}.mp3`
   }
 
   const togglePlay = (itemId: string, item: Record<string, unknown>) => {
