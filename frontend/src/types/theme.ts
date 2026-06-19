@@ -28,7 +28,7 @@ export interface ThemeConfig {
   colors: ThemeColors
   radii: ThemeRadii
   blur: ThemeBlur
-  wallpaper: string
+  wallpaper: string  // CSS gradient string
 }
 
 export type ThemePreset = 'light' | 'dark' | 'mocha' | 'sakura' | 'synthwave' | 'tokyo-night' | 'custom'

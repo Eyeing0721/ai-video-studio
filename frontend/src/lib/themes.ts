@@ -1,13 +1,13 @@
 import type { ThemeConfig, ThemePreset } from '../types/theme'
 
-// SVG data URIs for wallpapers (compressed gradients that evoke each theme)
-const WALLPAPERS = {
-  light: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4F3F0"/><stop offset="50%" stop-color="#EDE9E2"/><stop offset="100%" stop-color="#E5E0DA"/></linearGradient></defs><rect width="800" height="600" fill="url(#g)"/></svg>'),
-  dark: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1A1B1E"/><stop offset="50%" stop-color="#202125"/><stop offset="100%" stop-color="#15161A"/></linearGradient></defs><rect width="800" height="600" fill="url(#g)"/></svg>'),
-  mocha: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><defs><radialGradient id="g" cx="0.3" cy="0.3" r="0.8"><stop offset="0" stop-color="#A47864" stop-opacity="0.15"/><stop offset="100%" stop-color="#F5EFE8"/></radialGradient></defs><rect width="800" height="600" fill="url(#g)"/></svg>'),
-  sakura: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><defs><radialGradient id="g1" cx="0.2" cy="0.3" r="0.6"><stop offset="0" stop-color="#FEDFE1" stop-opacity="0.3"/><stop offset="100%" stop-color="#FDF6F5"/></radialGradient><radialGradient id="g2" cx="0.8" cy="0.7" r="0.5"><stop offset="0" stop-color="#D4A5B9" stop-opacity="0.1"/><stop offset="100%" stop-color="#FDF6F5"/></radialGradient></defs><rect width="800" height="600" fill="url(#g1)"/><rect width="800" height="600" fill="url(#g2)"/></svg>'),
-  synthwave: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0020"/><stop offset="60%" stop-color="#1A0033"/><stop offset="100%" stop-color="#FF6B9D" stop-opacity="0.3"/></linearGradient><linearGradient id="sun" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FF6B9D"/><stop offset="40%" stop-color="#FF4470"/><stop offset="100%" stop-color="#FFD700"/></linearGradient></defs><rect width="800" height="600" fill="url(#sky)"/><circle cx="400" cy="480" r="200" fill="url(#sun)" opacity="0.6"/><line x1="0" y1="400" x2="800" y2="400" stroke="#FF6B9D" opacity="0.3" stroke-width="2"/><line x1="0" y1="420" x2="800" y2="420" stroke="#00FFFF" opacity="0.2" stroke-width="1"/><line x1="0" y1="440" x2="800" y2="440" stroke="#FF6B9D" opacity="0.2" stroke-width="1"/><line x1="0" y1="460" x2="800" y2="460" stroke="#00FFFF" opacity="0.15" stroke-width="1"/><line x1="0" y1="480" x2="800" y2="480" stroke="#FF6B9D" opacity="0.1" stroke-width="1"/></svg>'),
-  tokyo: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0F25"/><stop offset="50%" stop-color="#161B35"/><stop offset="100%" stop-color="#1A1D2E"/></linearGradient><radialGradient id="neon1" cx="0.3" cy="0.5" r="0.3"><stop offset="0" stop-color="#F5A623" stop-opacity="0.15"/><stop offset="100%" stop-color="transparent"/></radialGradient><radialGradient id="neon2" cx="0.7" cy="0.4" r="0.35"><stop offset="0" stop-color="#7B9AEA" stop-opacity="0.12"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="800" height="600" fill="url(#sky)"/><rect width="800" height="600" fill="url(#neon1)"/><rect width="800" height="600" fill="url(#neon2)"/><circle cx="600" cy="150" r="3" fill="#F5A623" opacity="0.6"/><circle cx="200" cy="80" r="2" fill="#F5A623" opacity="0.4"/><circle cx="350" cy="120" r="2" fill="#7B9AEA" opacity="0.5"/></svg>'),
+// CSS gradient strings for wallpapers (reliable, no SVG data URI issues)
+const WALLPAPERS: Record<string, string> = {
+  light: 'linear-gradient(135deg, #F4F3F0 0%, #EDE9E2 40%, #E5E0DA 70%, #D9D2C5 100%)',
+  dark: 'linear-gradient(135deg, #1A1B1E 0%, #202125 40%, #15161A 70%, #0D0E12 100%)',
+  mocha: 'radial-gradient(ellipse at 30% 30%, #C9A88C 0%, #F5EFE8 50%, #E8D5C0 100%)',
+  sakura: 'linear-gradient(135deg, #FDF6F5 0%, #FEDFE1 30%, #FDF6F5 60%, #F5D5E0 100%)',
+  synthwave: 'linear-gradient(180deg, #0A0020 0%, #1A0033 40%, #2D0050 70%, #FF4470 100%), radial-gradient(ellipse at 50% 100%, #FF6B9D 0%, transparent 60%)',
+  tokyo: 'linear-gradient(180deg, #0A0F25 0%, #161B35 30%, #1A1D2E 60%, #2A2E42 100%), radial-gradient(ellipse at 30% 50%, #F5A62322 0%, transparent 50%), radial-gradient(ellipse at 70% 40%, #7B9AEA22 0%, transparent 50%)',
 }
 
 export const PRESETS: Record<ThemePreset, ThemeConfig> = {
@@ -82,7 +82,9 @@ export function applyTheme(config: ThemeConfig) {
   root.style.setProperty('--blur-modal', config.blur.modal)
   root.style.setProperty('--blur-panel', config.blur.panel)
   // Wallpaper
-  root.style.setProperty('--wallpaper', `url(${config.wallpaper})`)
+  document.body.style.backgroundImage = config.wallpaper
+  document.body.style.backgroundSize = 'cover'
+  document.body.style.backgroundAttachment = 'fixed'
 
   const isDark = ['dark', 'synthwave', 'tokyo-night'].includes(config.name)
   document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
