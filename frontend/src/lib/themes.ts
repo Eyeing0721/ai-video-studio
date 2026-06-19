@@ -1,13 +1,13 @@
 import type { ThemeConfig, ThemePreset } from '../types/theme'
 
-// CSS gradient strings for wallpapers (reliable, no SVG data URI issues)
+// Real photo wallpapers - each theme gets a matching atmospheric image
 const WALLPAPERS: Record<string, string> = {
-  light: 'linear-gradient(135deg, #F4F3F0 0%, #EDE9E2 40%, #E5E0DA 70%, #D9D2C5 100%)',
-  dark: 'linear-gradient(135deg, #1A1B1E 0%, #202125 40%, #15161A 70%, #0D0E12 100%)',
-  mocha: 'radial-gradient(ellipse at 30% 30%, #C9A88C 0%, #F5EFE8 50%, #E8D5C0 100%)',
-  sakura: 'linear-gradient(135deg, #FDF6F5 0%, #FEDFE1 30%, #FDF6F5 60%, #F5D5E0 100%)',
-  synthwave: 'linear-gradient(180deg, #0A0020 0%, #1A0033 40%, #2D0050 70%, #FF4470 100%), radial-gradient(ellipse at 50% 100%, #FF6B9D 0%, transparent 60%)',
-  tokyo: 'linear-gradient(180deg, #0A0F25 0%, #161B35 30%, #1A1D2E 60%, #2A2E42 100%), radial-gradient(ellipse at 30% 50%, #F5A62322 0%, transparent 50%), radial-gradient(ellipse at 70% 40%, #7B9AEA22 0%, transparent 50%)',
+  light: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80), linear-gradient(135deg, #F4F3F0, #E5E0DA)',
+  dark: 'url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80), linear-gradient(135deg, #1A1B1E, #15161A)',
+  mocha: 'url(https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1920&q=80), radial-gradient(ellipse at 30% 30%, #A47864, #F5EFE8)',
+  sakura: 'url(https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1920&q=80), linear-gradient(135deg, #FDF6F5, #FEDFE1)',
+  synthwave: 'url(https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80), linear-gradient(180deg, #0A0020, #FF4470)',
+  tokyo: 'url(https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1920&q=80), linear-gradient(180deg, #0A0F25, #1A1D2E)',
 }
 
 export const PRESETS: Record<ThemePreset, ThemeConfig> = {
