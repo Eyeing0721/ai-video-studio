@@ -369,66 +369,370 @@ class ComfyUIClient:
         negative_prompt: str = "",
         width: int = GEN["sulphur_width"],
         height: int = GEN["sulphur_height"],
-        length_frames: int = 81,
+        duration_sec: int = 8,
+        fps: int = 25,
         seed: int = -1,
+        enable_prompt_enhance: bool = False,
     ) -> dict:
         """Build a Sulphur 2 (LTX 2.3) image-to-video workflow.
-        The prompt is auto-prefixed with no-speech constraint.
+
+        Based on verified working workflow: video_mysulphur_i2v.json
+        Uses GGUF model + LTXV native nodes + LTXV latent upsampler.
+        Prompt auto-prefixed with no-speech constraint.
+
+        Args:
+            image_filename: Input image file name (in ComfyUI input dir)
+            positive_prompt: Text prompt
+            width/height: Output dimensions (will be doubled by latent upsampler)
+            duration_sec: Video duration in seconds
+            fps: Frames per second
+            enable_prompt_enhance: If True, use TextGenerateLTX2Prompt node
         """
         import random
         seed = seed if seed >= 0 else random.randint(0, 2**31 - 1)
 
-        # Automatically inject no-speech directive
+        # Auto-inject no-speech directive
         speech_ban = "[no speech, no dialogue, silent, instrumental only]"
         if speech_ban not in positive_prompt.lower():
             positive_prompt = f"{speech_ban} {positive_prompt}"
 
-        loader = self._node_id()
-        clip = self._node_id()
-        pos = self._node_id()
-        neg = self._node_id()
-        sampler = self._node_id()
-        decode = self._node_id()
-        save = self._node_id()
+        # ── Model loaders ──────────────────────────────────
+        unet_gguf = self._node_id()      # UnetLoaderGGUF
+        text_enc = self._node_id()       # LTXAVTextEncoderLoader
+        vae = self._node_id()            # VAELoader
+        audio_vae = self._node_id()      # LTXVAudioVAELoader
 
-        return {
-            loader: {
-                "class_type": "LTXVLoader",
+        # ── LoRA chain ─────────────────────────────────────
+        lora_gemma = self._node_id()     # LoraLoader (gemma uncensored)
+        lora_ltx = self._node_id()       # LoraLoaderModelOnly (distilled)
+
+        # ── Prompt ─────────────────────────────────────────
+        prompt_str = self._node_id()     # PrimitiveStringMultiline
+        prompt_switch = self._node_id()  # ComfySwitchNode (enhance on/off)
+        prompt_enhance = self._node_id() # TextGenerateLTX2Prompt
+        prompt_enh_switch = self._node_id() # PrimitiveBoolean
+
+        # ── Dimension/param primitives ─────────────────────
+        p_width = self._node_id()        # PrimitiveInt
+        p_height = self._node_id()       # PrimitiveInt
+        p_fps = self._node_id()          # PrimitiveInt
+        p_duration = self._node_id()     # PrimitiveInt
+        p_bypass = self._node_id()       # PrimitiveBoolean (T2V switch)
+
+        # ── Math ───────────────────────────────────────────
+        math_length = self._node_id()    # ComfyMathExpression (duration*fps+1)
+        math_fps = self._node_id()       # ComfyMathExpression (fps pass-through)
+        math_w = self._node_id()         # ComfyMathExpression (width/2)
+        math_h = self._node_id()         # ComfyMathExpression (height/2)
+
+        # ── Text encoding ──────────────────────────────────
+        pos_encode = self._node_id()     # CLIPTextEncode (positive)
+        neg_encode = self._node_id()     # CLIPTextEncode (negative)
+        condition = self._node_id()      # LTXVConditioning
+        crop_guides = self._node_id()    # LTXVCropGuides
+
+        # ── Image preprocessing ────────────────────────────
+        resize_img = self._node_id()     # ResizeImagesByLongerEdge (1536)
+        preprocess = self._node_id()     # LTXVPreprocess
+        resize_mask = self._node_id()    # ResizeImageMaskNode
+
+        # ── Latent space ───────────────────────────────────
+        empty_latent = self._node_id()   # EmptyLTXVLatentVideo
+        empty_audio = self._node_id()    # LTXVEmptyLatentAudio
+        latent_upscaler = self._node_id()# LTXVLatentUpsampler
+        img2video_init = self._node_id() # LTXVImgToVideoInplace (init)
+        img2video_refine = self._node_id()# LTXVImgToVideoInplace (refine)
+
+        # ── Samplers ───────────────────────────────────────
+        sampler_select1 = self._node_id()# KSamplerSelect
+        sampler_select2 = self._node_id()# KSamplerSelect
+        sigmas1 = self._node_id()        # ManualSigmas
+        sigmas2 = self._node_id()        # ManualSigmas
+        cfg1 = self._node_id()           # CFGGuider
+        cfg2 = self._node_id()           # CFGGuider
+        noise1 = self._node_id()         # RandomNoise
+        noise2 = self._node_id()         # RandomNoise
+
+        # ── Sampling passes ────────────────────────────────
+        sampler_pass1 = self._node_id()  # SamplerCustomAdvanced (noise→latent)
+        sampler_pass2 = self._node_id()  # SamplerCustomAdvanced (refine)
+
+        # ── Audio/Video concat ─────────────────────────────
+        concat1 = self._node_id()        # LTXVConcatAVLatent
+        concat2 = self._node_id()        # LTXVConcatAVLatent
+        separate1 = self._node_id()      # LTXVSeparateAVLatent
+        separate2 = self._node_id()      # LTXVSeparateAVLatent
+
+        # ── Decode ─────────────────────────────────────────
+        vae_decode = self._node_id()     # VAEDecodeTiled
+        audio_decode = self._node_id()   # LTXVAudioVAEDecode
+        create_video = self._node_id()   # CreateVideo
+
+        nodes: dict[str, dict] = {
+            # ── Image input (from LoadImage or passed via filename) ──
+            "load_image": {
+                "class_type": "LoadImage",
+                "inputs": {"image": image_filename},
+            },
+
+            # ── Model loaders ──────────────────────────────
+            unet_gguf: {
+                "class_type": "UnetLoaderGGUF",
+                "inputs": {"unet_name": MODELS["sulphur_gguf"]},
+            },
+            text_enc: {
+                "class_type": "LTXAVTextEncoderLoader",
                 "inputs": {
+                    "text_encoder": "gemma_3_12B_it_fp4_mixed.safetensors",
                     "ckpt_name": MODELS["sulphur_fp8"],
-                    "vae_name": "sulphur_vae.safetensors",
+                    "device": "default",
                 },
             },
-            clip: {
-                "class_type": "CLIPLoader",
-                "inputs": {"clip_name": "sulphur_text_encoder.safetensors", "type": "ltxv", "device": "default"},
+            vae: {
+                "class_type": "VAELoader",
+                "inputs": {"vae_name": "sulphur_vae.safetensors"},
             },
-            pos: {
-                "class_type": "CLIPTextEncode",
-                "inputs": {"clip": [clip, 0], "text": positive_prompt},
+            audio_vae: {
+                "class_type": "LTXVAudioVAELoader",
+                "inputs": {"ckpt_name": MODELS["sulphur_fp8"]},
             },
-            neg: {
-                "class_type": "CLIPTextEncode",
-                "inputs": {"clip": [clip, 0], "text": negative_prompt or "static, blurry, low quality, distorted, speech, talking"},
-            },
-            sampler: {
-                "class_type": "LTXVScheduler",
+
+            # ── LoRA ───────────────────────────────────────
+            lora_gemma: {
+                "class_type": "LoraLoader",
                 "inputs": {
-                    "model": [loader, 0], "positive": [pos, 0], "negative": [neg, 0],
-                    "image": image_filename, "seed": seed,
-                    "width": width, "height": height, "length": length_frames,
-                    "steps": 8, "cfg": 2.0,
+                    "lora_name": "gemma-3-12b-it-abliterated_lora_rank64_bf16.safetensors",
+                    "strength_model": 1, "strength_clip": 1,
+                    "model": [unet_gguf, 0], "clip": [text_enc, 0],
                 },
             },
-            decode: {
-                "class_type": "VAEDecode",
-                "inputs": {"samples": [sampler, 0], "vae": [loader, 1]},
+            lora_ltx: {
+                "class_type": "LoraLoaderModelOnly",
+                "inputs": {
+                    "lora_name": "ltx-2.3-22b-distilled-lora-1.1_fro90_ceil72_condsafe.safetensors",
+                    "strength_model": 0.5, "model": [lora_gemma, 0],
+                },
             },
-            save: {
-                "class_type": "SaveImage",
-                "inputs": {"filename_prefix": "avs_sulphur", "images": [decode, 0]},
+
+            # ── Prompt ─────────────────────────────────────
+            prompt_str: {
+                "class_type": "PrimitiveStringMultiline",
+                "inputs": {"value": positive_prompt},
+            },
+            prompt_enh_switch: {
+                "class_type": "PrimitiveBoolean",
+                "inputs": {"value": enable_prompt_enhance},
+            },
+            prompt_enhance: {
+                "class_type": "TextGenerateLTX2Prompt",
+                "inputs": {
+                    "prompt": [prompt_str, 0], "max_length": 2048,
+                    "sampling_mode": "on", "thinking": False,
+                    "use_default_template": True,
+                    "clip": [lora_gemma, 1],
+                },
+            },
+
+            # ── Params ─────────────────────────────────────
+            p_width: {"class_type": "PrimitiveInt", "inputs": {"value": width}},
+            p_height: {"class_type": "PrimitiveInt", "inputs": {"value": height}},
+            p_fps: {"class_type": "PrimitiveInt", "inputs": {"value": fps}},
+            p_duration: {"class_type": "PrimitiveInt", "inputs": {"value": duration_sec}},
+            p_bypass: {"class_type": "PrimitiveBoolean", "inputs": {"value": False}},
+
+            # ── Math ───────────────────────────────────────
+            math_length: {
+                "class_type": "ComfyMathExpression",
+                "inputs": {"expression": "a * b + 1", "values.a": [p_duration, 0], "values.b": [p_fps, 0]},
+            },
+            math_fps: {
+                "class_type": "ComfyMathExpression",
+                "inputs": {"expression": "a", "values.a": [p_fps, 0]},
+            },
+            math_w: {
+                "class_type": "ComfyMathExpression",
+                "inputs": {"expression": "a/2", "values.a": [p_width, 0]},
+            },
+            math_h: {
+                "class_type": "ComfyMathExpression",
+                "inputs": {"expression": "a/2", "values.a": [p_height, 0]},
+            },
+
+            # ── Text encoding ──────────────────────────────
+            pos_encode: {
+                "class_type": "CLIPTextEncode",
+                "inputs": {"text": [prompt_str, 0], "clip": [lora_gemma, 1]},
+            },
+            neg_encode: {
+                "class_type": "CLIPTextEncode",
+                "inputs": {"text": negative_prompt or "pc game, cartoon, childish, ugly", "clip": [lora_gemma, 1]},
+            },
+            condition: {
+                "class_type": "LTXVConditioning",
+                "inputs": {
+                    "frame_rate": [math_fps, 0],
+                    "positive": [pos_encode, 0], "negative": [neg_encode, 0],
+                },
+            },
+            crop_guides: {
+                "class_type": "LTXVCropGuides",
+                "inputs": {
+                    "positive": [condition, 0], "negative": [condition, 1],
+                    "latent": [img2video_init, 1],
+                },
+            },
+
+            # ── Image preprocessing ────────────────────────
+            resize_img: {
+                "class_type": "ResizeImagesByLongerEdge",
+                "inputs": {"longer_edge": 1536, "images": ["load_image", 0]},
+            },
+            preprocess: {
+                "class_type": "LTXVPreprocess",
+                "inputs": {"img_compression": 18, "image": [resize_img, 0]},
+            },
+            resize_mask: {
+                "class_type": "ResizeImageMaskNode",
+                "inputs": {
+                    "resize_type": "scale dimensions",
+                    "resize_type.width": [p_width, 0],
+                    "resize_type.height": [p_height, 0],
+                    "resize_type.crop": "center", "scale_method": "lanczos",
+                    "input": ["load_image", 0],
+                },
+            },
+
+            # ── Latent space ───────────────────────────────
+            empty_latent: {
+                "class_type": "EmptyLTXVLatentVideo",
+                "inputs": {
+                    "width": [math_w, 1], "height": [math_h, 1],
+                    "length": [math_length, 1], "batch_size": 1,
+                },
+            },
+            empty_audio: {
+                "class_type": "LTXVEmptyLatentAudio",
+                "inputs": {
+                    "frames_number": [math_length, 1],
+                    "frame_rate": [math_fps, 1],
+                    "batch_size": 1,
+                    "audio_vae": [audio_vae, 0],
+                },
+            },
+            latent_upscaler: {
+                "class_type": "LTXVLatentUpsampler",
+                "inputs": {
+                    "samples": [separate1, 0],
+                    "upscale_model": ["ltx_upscaler", 0],
+                    "vae": [vae, 0],
+                },
+            },
+            "ltx_upscaler": {
+                "class_type": "LatentUpscaleModelLoader",
+                "inputs": {"model_name": "ltx-2.3-spatial-upscaler-x2-1.0.safetensors"},
+            },
+
+            # ── I2V stages ────────────────────────────────
+            img2video_init: {
+                "class_type": "LTXVImgToVideoInplace",
+                "inputs": {
+                    "strength": 0.7, "bypass": [p_bypass, 0],
+                    "vae": [vae, 0], "image": [preprocess, 0],
+                    "latent": [empty_latent, 0],
+                },
+            },
+            img2video_refine: {
+                "class_type": "LTXVImgToVideoInplace",
+                "inputs": {
+                    "strength": 1, "bypass": [p_bypass, 0],
+                    "vae": [vae, 0], "image": [preprocess, 0],
+                    "latent": [latent_upscaler, 1],
+                },
+            },
+
+            # ── Samplers ───────────────────────────────────
+            sampler_select1: {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
+            sampler_select2: {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
+            sigmas1: {"class_type": "ManualSigmas", "inputs": {"sigmas": "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"}},
+            sigmas2: {"class_type": "ManualSigmas", "inputs": {"sigmas": "0.85, 0.7250, 0.4219, 0.0"}},
+            cfg1: {
+                "class_type": "CFGGuider",
+                "inputs": {"cfg": 1, "model": [lora_ltx, 0], "positive": [condition, 0], "negative": [condition, 1]},
+            },
+            cfg2: {
+                "class_type": "CFGGuider",
+                "inputs": {"cfg": 1, "model": [lora_ltx, 0], "positive": [crop_guides, 0], "negative": [crop_guides, 1]},
+            },
+            noise1: {"class_type": "RandomNoise", "inputs": {"noise_seed": 42}},
+            noise2: {"class_type": "RandomNoise", "inputs": {"noise_seed": seed}},
+
+            # ── Sampling passes ────────────────────────────
+            concat1: {
+                "class_type": "LTXVConcatAVLatent",
+                "inputs": {"video_latent": [img2video_init, 0], "audio_latent": [empty_audio, 0]},
+            },
+            sampler_pass1: {
+                "class_type": "SamplerCustomAdvanced",
+                "inputs": {
+                    "noise": [noise1, 0], "guider": [cfg1, 0],
+                    "sampler": [sampler_select1, 0], "sigmas": [sigmas1, 0],
+                    "latent_image": [concat1, 0],
+                },
+            },
+            separate1: {
+                "class_type": "LTXVSeparateAVLatent",
+                "inputs": {"av_latent": [sampler_pass1, 0]},
+            },
+
+            concat2: {
+                "class_type": "LTXVConcatAVLatent",
+                "inputs": {"video_latent": [img2video_refine, 0], "audio_latent": [empty_audio, 0]},
+            },
+            sampler_pass2: {
+                "class_type": "SamplerCustomAdvanced",
+                "inputs": {
+                    "noise": [noise2, 0], "guider": [cfg2, 0],
+                    "sampler": [sampler_select2, 0], "sigmas": [sigmas2, 0],
+                    "latent_image": [concat2, 0],
+                },
+            },
+            separate2: {
+                "class_type": "LTXVSeparateAVLatent",
+                "inputs": {"av_latent": [sampler_pass2, 0]},
+            },
+
+            # ── Decode ─────────────────────────────────────
+            vae_decode: {
+                "class_type": "VAEDecodeTiled",
+                "inputs": {
+                    "tile_size": 768, "overlap": 64,
+                    "temporal_size": 4096, "temporal_overlap": 4,
+                    "samples": [separate2, 0], "vae": [vae, 0],
+                },
+            },
+            audio_decode: {
+                "class_type": "LTXVAudioVAEDecode",
+                "inputs": {"samples": [separate1, 1], "audio_vae": [audio_vae, 0]},
+            },
+            create_video: {
+                "class_type": "CreateVideo",
+                "inputs": {
+                    "fps": [math_fps, 0],
+                    "images": [vae_decode, 0],
+                    "audio": [audio_decode, 0],
+                },
+            },
+            self._node_id(): {
+                "class_type": "SaveVideo",
+                "inputs": {
+                    "filename_prefix": "avs_sulphur",
+                    "format": "auto", "codec": "auto",
+                    "video": [create_video, 0],
+                },
             },
         }
+
+        return nodes
 
     def build_upscale_workflow(
         self,
