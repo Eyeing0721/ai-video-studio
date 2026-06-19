@@ -173,6 +173,8 @@ async def run_full_pipeline(
 
         output_dir = await create_output_dirs(task_id)
         t.output_dir = str(output_dir)
+        comfy_input_dir = Path("F:/ComfyUI/input")
+        comfy_input_dir.mkdir(parents=True, exist_ok=True)
 
         # ── Load template ────────────────────────────────
         template = get_template(template_id) or get_template("micro_drama")
@@ -264,6 +266,10 @@ async def run_full_pipeline(
                                 if src.exists():
                                     shutil.copy2(src, dst)
                                     db_shot.keyframe_path = str(dst)
+                                    # Also copy to ComfyUI input for I2V step
+                                    input_name = f"avs_shot_{task_id}_{shot_dict['id']:03d}.png"
+                                    shutil.copy2(src, comfy_input_dir / input_name)
+                                    db_shot.first_frame_path = str(comfy_input / input_name)
                     db_shot.status = "keyframe_done"
                 except Exception as exc:
                     logger.error(f"Keyframe gen failed for shot {shot_dict['id']}: {exc}")
@@ -295,7 +301,9 @@ async def run_full_pipeline(
                 shot_path = output_dir / "shots" / f"{shot_id:03d}"
 
                 prompt = f"{shot_dict['description']}, {shot_dict['mood']}"
-                image_input = str(prev_last_frame or shot_path / f"keyframe_{shot_id:03d}.png")
+                # ComfyUI LoadImage expects filename relative to input/ dir
+                comfy_input_name = f"avs_shot_{task_id}_{shot_id:03d}.png"
+                image_input = comfy_input_name  # filename only, ComfyUI resolves from input/
 
                 # ── Bidirectional model fallback with per-model retry ──
                 # Tries Sulphur first, then Wan. Each model gets retry_with_backoff.
@@ -382,7 +390,10 @@ async def run_full_pipeline(
                         last_frame_path = shot_path / f"last_frame_{shot_id:03d}.png"
                         cv2.imwrite(str(last_frame_path), frame)
                         db_shot.last_frame_path = str(last_frame_path)
-                        prev_last_frame = last_frame_path
+                        # Copy to ComfyUI input for next shot's LoadImage
+                        next_name = f"avs_shot_{task_id}_{shot_id+1:03d}.png"
+                        shutil.copy2(str(last_frame_path), str(comfy_input_dir / next_name))
+                        prev_last_frame = next_name
                     cap.release()
                 else:
                     prev_last_frame = None
