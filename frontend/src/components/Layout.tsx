@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import { Film, FileText, ListTodo, FolderOpen, Settings } from 'lucide-react'
 
 const NAV = [
@@ -11,6 +11,7 @@ const NAV = [
 ]
 
 export default function Layout() {
+  const location = useLocation()
   return (
     <div className="flex h-screen" style={{ background: 'var(--theme-bg)' }}>
       <nav
@@ -42,7 +43,9 @@ export default function Layout() {
         ))}
       </nav>
       <main className="flex-1 overflow-auto p-6">
-        <Outlet />
+        <div className="page-enter" key={location.pathname}>
+          <Outlet />
+        </div>
       </main>
     </div>
   )
