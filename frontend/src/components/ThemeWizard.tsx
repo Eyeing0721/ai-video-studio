@@ -5,22 +5,25 @@ import type { ThemePreset } from '../types/theme'
 
 const PRESET_ORDER: ThemePreset[] = ['light', 'dark', 'mocha', 'sakura', 'synthwave', 'tokyo-night']
 
+const WIZARD_KEY = 'ai-video-studio-wizard-done'
+
 export default function ThemeWizard() {
   const { switchPreset } = useThemeCtx()
-  const [show, setShow] = useState(() => localStorage.getItem('ai-video-studio-wizard-done') === null)
+  const [show, setShow] = useState(() => {
+    try { return localStorage.getItem(WIZARD_KEY) !== '1' }
+    catch { return true }
+  })
   const [step, setStep] = useState(0)
 
   if (!show) return null
 
-  const finish = () => {
-    localStorage.setItem('ai-video-studio-wizard-done', '1')
+  const dismiss = () => {
+    try { localStorage.setItem(WIZARD_KEY, '1') } catch {}
     setShow(false)
   }
 
-  const skip = () => {
-    localStorage.setItem('ai-video-studio-wizard-done', '1')
-    setShow(false)
-  }
+  const finish = () => { dismiss() }
+  const skip = () => { dismiss() }
 
   if (step === 0) {
     return (

@@ -92,7 +92,7 @@ export default function SetupWizard({ onDone }: { onDone: () => void }) {
   if (!show) return null
 
   const finish = () => {
-    localStorage.setItem('avs-setup-done', '1')
+    try { localStorage.setItem('avs-setup-done', '1') } catch {}
     setShow(false)
     onDone()
   }

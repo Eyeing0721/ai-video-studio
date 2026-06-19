@@ -90,6 +90,15 @@ _prompt_learner_task = None
 _workflow_fetcher_task = None
 
 
+# ── Static media files ────────────────────────────────
+
+from fastapi.staticfiles import StaticFiles
+import os
+media_dir = os.path.join(os.path.dirname(__file__), '..', 'media_library')
+if os.path.isdir(media_dir):
+    app.mount("/media", StaticFiles(directory=media_dir), name="media")
+
+
 # ── Routes ──────────────────────────────────────────────
 
 @app.get("/api/health")

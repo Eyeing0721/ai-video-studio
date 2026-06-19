@@ -10,25 +10,7 @@ interface BgmItem { id: string; name: string; genre: string; tags: string[]; moo
 interface LutItem { id: string; name: string; name_cn: string; style: string; tags: string[]; use_case: string[]; url: string }
 interface SfxItem { id: string; name: string; name_cn: string; type: string; tags: string[]; use_case: string[] }
 
-const SAMPLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="280">' +
-  '<defs>' +
-    '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A90D9"/><stop offset="60%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#B8D4E8"/></linearGradient>' +
-    '<linearGradient id="mtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5D7B5E"/><stop offset="100%" stop-color="#3D5A3E"/></linearGradient>' +
-    '<linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7BA669"/><stop offset="100%" stop-color="#5C8A4A"/></linearGradient>' +
-    '<radialGradient id="sun" cx="0.75" cy="0.25" r="0.15"><stop offset="0%" stop-color="#FFF9E0"/><stop offset="100%" stop-color="#FFD700"/></radialGradient>' +
-  '</defs>' +
-  '<rect width="400" height="180" fill="url(#sky)"/>' +
-  '<circle cx="300" cy="40" r="45" fill="#FFF9E0" opacity="0.9"/>' +
-  '<polygon points="80,180 200,60 320,180" fill="url(#mtn)"/>' +
-  '<polygon points="150,180 280,80 400,180" fill="#4A6B4A" opacity="0.7"/>' +
-  '<rect x="0" y="165" width="400" height="115" fill="url(#grass)"/>' +
-  '<rect x="0" y="165" width="400" height="3" fill="#3D5A3E" opacity="0.5"/>' +
-  '<circle cx="120" cy="240" r="25" fill="#E8A87C"/>' +
-  '<circle cx="125" cy="225" r="12" fill="#D4956C"/>' +
-  '<text x="160" y="245" fill="#5C3A2E" font-size="11" font-family="sans-serif" font-weight="bold">人物</text>' +
-  '</svg>'
-)
+const DEFAULT_PREVIEW = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=280&fit=crop'
 
 export default function Assets() {
   const [activeType, setActiveType] = useState<AssetType>('全部')
@@ -37,7 +19,9 @@ export default function Assets() {
   const [sfxs, setSfxs] = useState<SfxItem[]>([])
   const [playing, setPlaying] = useState<string | null>(null)
   const [previewLut, setPreviewLut] = useState<LutItem | null>(null)
+  const [customImage, setCustomImage] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch(`${API}/api/bgm`).then(r => r.json()).then(d => Array.isArray(d) && setBgms(d.slice(0, 20))).catch(() => {})
@@ -45,17 +29,33 @@ export default function Assets() {
     fetch(`${API}/api/sfx`).then(r => r.json()).then(d => Array.isArray(d) && setSfxs(d)).catch(() => {})
   }, [])
 
-  const togglePlay = (id: string, url?: string) => {
-    if (playing === id) {
+  const getAudioUrl = (item: Record<string, unknown>) => {
+    // Prefer local media_library file served via backend
+    const name = (item.name as string) || ''
+    const id = (item.id as string) || ''
+    // Check if we have this as a local file
+    const localPath = `/media/bgm/${name.replace(/[^a-zA-Z0-9_-]/g, '_')}.mp3`
+    return localPath  // Will 404 if not found, that's OK
+  }
+
+  const togglePlay = (itemId: string, item: Record<string, unknown>) => {
+    if (playing === itemId) {
       audioRef.current?.pause()
       setPlaying(null)
       return
     }
     if (audioRef.current) {
       audioRef.current.pause()
-      audioRef.current.src = url || ''
-      audioRef.current.play().catch(() => {})
-      setPlaying(id)
+      audioRef.current.src = getAudioUrl(item)
+      audioRef.current.play().catch(() => {
+        // Fallback: try Pixabay URL if local fails
+        const url = (item as BgmItem).url
+        if (url && audioRef.current) {
+          audioRef.current.src = url
+          audioRef.current.play().catch(() => {})
+        }
+      })
+      setPlaying(itemId)
     }
   }
 
@@ -98,9 +98,8 @@ export default function Assets() {
             item={item}
             isPlaying={playing === ('id' in item ? item.id : `item-${i}`)}
             onPlay={() => {
-              const id = 'id' in item ? item.id : `item-${i}`
-              const url = 'url' in item ? (item as BgmItem).url : undefined
-              togglePlay(id, url)
+              const id = 'id' in item ? (item as Record<string,unknown>).id as string : `item-${i}`
+              togglePlay(id, item as Record<string, unknown>)
             }}
             onPreview={() => item._type === 'LUT' && setPreviewLut(item as unknown as LutItem)}
           />
@@ -123,15 +122,29 @@ export default function Assets() {
               <h3 className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>{previewLut.name_cn || previewLut.name}</h3>
               <button onClick={() => setPreviewLut(null)}><X size={20} /></button>
             </div>
+            <div className="flex items-center gap-2 mb-3">
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) { const r = new FileReader(); r.onload = () => setCustomImage(r.result as string); r.readAsDataURL(f) }}} />
+              <button onClick={() => fileInputRef.current?.click()}
+                className="text-xs px-3 py-1 rounded-lg font-medium"
+                style={{ background: 'var(--theme-accent)', color: '#fff', borderRadius: 'var(--theme-radius-sm)' }}>
+                {customImage ? '更换照片' : '上传照片预览'}
+              </button>
+              {customImage && <button onClick={() => setCustomImage(null)}
+                className="text-xs px-3 py-1 rounded-lg font-medium"
+                style={{ background: 'transparent', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)', borderRadius: 'var(--theme-radius-sm)' }}>
+                恢复默认
+              </button>}
+            </div>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <div className="text-xs mb-1" style={{ color: 'var(--theme-text-secondary)' }}>原始</div>
-                <img src={SAMPLE_IMAGE} alt="原始" className="w-full rounded-lg" style={{ borderRadius: 'var(--theme-radius-md)' }} />
+                <img src={customImage || DEFAULT_PREVIEW} alt="原始" className="w-full rounded-lg" style={{ borderRadius: 'var(--theme-radius-md)' }} />
               </div>
               <div>
                 <div className="text-xs mb-1" style={{ color: 'var(--theme-text-secondary)' }}>{previewLut.name} 效果</div>
                 <div className="relative w-full rounded-lg overflow-hidden" style={{ borderRadius: 'var(--theme-radius-md)' }}>
-                  <img src={SAMPLE_IMAGE} alt="LUT效果" className="w-full"
+                  <img src={customImage || DEFAULT_PREVIEW} alt="LUT效果" className="w-full"
                     style={{ filter: `contrast(1.2) saturate(1.1) hue-rotate(${previewLut.style === 'cinematic' ? '-10deg' : previewLut.style === 'vintage' ? '15deg' : previewLut.style === 'urban' ? '-25deg' : '0deg'})` }} />
                   <div className="absolute inset-0 flex items-center justify-center"
                     style={{ background: previewLut.style === 'cinematic' ? 'rgba(255,140,0,0.15)' : previewLut.style === 'vintage' ? 'rgba(180,130,80,0.2)' : previewLut.style === 'urban' ? 'rgba(0,150,255,0.12)' : previewLut.style === 'japanese' ? 'rgba(255,150,180,0.12)' : 'transparent' }} />
