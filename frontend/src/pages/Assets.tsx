@@ -1,90 +1,192 @@
-const TYPES = ['全部', 'BGM', '转场', '字幕', 'LUT', 'SFX'] as const
+import { useState, useEffect, useRef } from 'react'
+import { Play, Pause, Eye, X } from 'lucide-react'
 
-const DEMO = [
-  { type: 'BGM', name: 'Gentle Morning', tags: ['温暖', '钢琴', '慢节奏'], duration: '2:30' },
-  { type: 'BGM', name: 'Cyber Chase', tags: ['电子', '快节奏', '悬疑'], duration: '1:45' },
-  { type: 'BGM', name: 'Sakura Tears', tags: ['弦乐', '情感', '日本'], duration: '3:10' },
-  { type: '转场', name: 'Smooth Slide', tags: ['滑动', '商务', '柔滑'], duration: '-' },
-  { type: '字幕', name: '简约白字', tags: ['白色', '无衬线', '描边'], duration: '-' },
-  { type: 'LUT', name: 'Teal & Orange', tags: ['电影感', '暖色', '高对比'], duration: '-' },
-]
+const API = 'http://127.0.0.1:8000'
+
+type AssetType = '全部' | 'BGM' | 'LUT' | 'SFX'
+const TYPES: AssetType[] = ['全部', 'BGM', 'LUT', 'SFX']
+
+interface BgmItem { id: string; name: string; genre: string; tags: string[]; mood: string[]; duration_sec: number; bpm: number; url: string; license: string }
+interface LutItem { id: string; name: string; name_cn: string; style: string; tags: string[]; use_case: string[]; url: string }
+interface SfxItem { id: string; name: string; name_cn: string; type: string; tags: string[]; use_case: string[] }
+
+const SAMPLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c3e50"/><stop offset="50%" stop-color="#e74c3c"/><stop offset="100%" stop-color="#f39c12"/></linearGradient></defs><rect width="300" height="200" fill="url(#g)"/><circle cx="180" cy="80" r="30" fill="#fff" opacity="0.8"/><text x="30" y="120" fill="#fff" font-size="14" font-family="sans">Sample Preview</text></svg>')
 
 export default function Assets() {
+  const [activeType, setActiveType] = useState<AssetType>('全部')
+  const [bgms, setBgms] = useState<BgmItem[]>([])
+  const [luts, setLuts] = useState<LutItem[]>([])
+  const [sfxs, setSfxs] = useState<SfxItem[]>([])
+  const [playing, setPlaying] = useState<string | null>(null)
+  const [previewLut, setPreviewLut] = useState<LutItem | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    fetch(`${API}/api/bgm`).then(r => r.json()).then(d => Array.isArray(d) && setBgms(d.slice(0, 20))).catch(() => {})
+    fetch(`${API}/api/luts`).then(r => r.json()).then(d => Array.isArray(d) && setLuts(d)).catch(() => {})
+    fetch(`${API}/api/sfx`).then(r => r.json()).then(d => Array.isArray(d) && setSfxs(d)).catch(() => {})
+  }, [])
+
+  const togglePlay = (id: string, url?: string) => {
+    if (playing === id) {
+      audioRef.current?.pause()
+      setPlaying(null)
+      return
+    }
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.src = url || ''
+      audioRef.current.play().catch(() => {})
+      setPlaying(id)
+    }
+  }
+
+  const filtered = [
+    ...(activeType === '全部' || activeType === 'BGM' ? bgms.map(b => ({ ...b, _type: 'BGM' as const })) : []),
+    ...(activeType === '全部' || activeType === 'LUT' ? luts.map(l => ({ ...l, _type: 'LUT' as const })) : []),
+    ...(activeType === '全部' || activeType === 'SFX' ? sfxs.map(s => ({ ...s, _type: 'SFX' as const })) : []),
+  ]
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
+      <audio ref={audioRef} onEnded={() => setPlaying(null)} className="hidden" />
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text)' }}>资产库</h1>
-        <button
-          className="px-4 py-2 rounded-lg text-sm font-medium text-white"
-          style={{ background: 'var(--theme-accent)', borderRadius: 'var(--theme-radius-md)' }}
-        >
-          上传资产
-        </button>
-      </div>
-
-      <div className="flex gap-2 mb-4">
-        <input
-          placeholder="搜索标签..."
-          className="flex-1 px-3 py-2 rounded-lg text-sm"
-          style={{
-            background: 'var(--theme-bg)',
-            color: 'var(--theme-text)',
-            border: '1px solid var(--theme-border)',
-            borderRadius: 'var(--theme-radius-md)',
-          }}
-        />
+        <button className="px-4 py-2 rounded-lg text-sm font-medium text-white"
+          style={{ background: 'var(--theme-accent)', borderRadius: 'var(--theme-radius-md)' }}>上传资产</button>
       </div>
 
       <div className="flex gap-2 mb-6">
-        {TYPES.map((t) => (
-          <button
-            key={t}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium"
+        {TYPES.map(t => (
+          <button key={t} onClick={() => setActiveType(t)}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: t === '全部' ? 'var(--theme-accent)' : 'var(--theme-surface)',
-              color: t === '全部' ? '#fff' : 'var(--theme-text)',
-              border: `1px solid ${t === '全部' ? 'var(--theme-accent)' : 'var(--theme-border)'}`,
-              borderRadius: 'var(--theme-radius-sm)',
+              background: activeType === t ? 'var(--theme-accent)' : 'var(--theme-surface)',
+              color: activeType === t ? '#fff' : 'var(--theme-text)',
+              border: `1px solid ${activeType === t ? 'var(--theme-accent)' : 'var(--theme-border)'}`,
+              borderRadius: 'var(--theme-radius-md)',
+            }}>{t}</button>
+        ))}
+        <span className="ml-auto text-xs self-center" style={{ color: 'var(--theme-text-secondary)' }}>
+          {filtered.length} 项
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        {filtered.map((item, i) => (
+          <AssetCard
+            key={`${item._type}-${i}`}
+            item={item}
+            isPlaying={playing === ('id' in item ? item.id : `item-${i}`)}
+            onPlay={() => {
+              const id = 'id' in item ? item.id : `item-${i}`
+              const url = 'url' in item ? (item as BgmItem).url : undefined
+              togglePlay(id, url)
             }}
-          >
-            {t}
-          </button>
+            onPreview={() => item._type === 'LUT' && setPreviewLut(item as unknown as LutItem)}
+          />
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {DEMO.map((a, i) => (
-          <div
-            key={i}
-            className="p-4 rounded-lg"
-            style={{
-              background: 'var(--theme-surface)',
-              border: '1px solid var(--theme-border)',
-              borderRadius: 'var(--theme-radius-md)',
-            }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: 'var(--theme-bg)', color: 'var(--theme-accent)' }}>
-                {a.type}
-              </span>
-              <span className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>{a.duration}</span>
+      {filtered.length === 0 && (
+        <p className="text-center py-20 text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
+          暂无资产。启动后端后自动加载。
+        </p>
+      )}
+
+      {/* LUT Preview Modal */}
+      {previewLut && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setPreviewLut(null)}>
+          <div className="glass-strong p-6 rounded-2xl max-w-lg w-full" onClick={e => e.stopPropagation()}
+            style={{ borderRadius: 'var(--theme-radius-lg)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>{previewLut.name_cn || previewLut.name}</h3>
+              <button onClick={() => setPreviewLut(null)}><X size={20} /></button>
             </div>
-            <div className="font-medium text-sm mb-2" style={{ color: 'var(--theme-text)' }}>{a.name}</div>
-            <div className="flex gap-1.5 flex-wrap">
-              {a.tags.map((t) => (
-                <span
-                  key={t}
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{
-                    background: 'var(--theme-bg)',
-                    color: 'var(--theme-text-secondary)',
-                  }}
-                >
-                  {t}
-                </span>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <div className="text-xs mb-1" style={{ color: 'var(--theme-text-secondary)' }}>原始</div>
+                <img src={SAMPLE_IMAGE} alt="原始" className="w-full rounded-lg" style={{ borderRadius: 'var(--theme-radius-md)' }} />
+              </div>
+              <div>
+                <div className="text-xs mb-1" style={{ color: 'var(--theme-text-secondary)' }}>{previewLut.name} 效果</div>
+                <div className="relative w-full rounded-lg overflow-hidden" style={{ borderRadius: 'var(--theme-radius-md)' }}>
+                  <img src={SAMPLE_IMAGE} alt="LUT效果" className="w-full"
+                    style={{ filter: `contrast(1.2) saturate(1.1) hue-rotate(${previewLut.style === 'cinematic' ? '-10deg' : previewLut.style === 'vintage' ? '15deg' : previewLut.style === 'urban' ? '-25deg' : '0deg'})` }} />
+                  <div className="absolute inset-0 flex items-center justify-center"
+                    style={{ background: previewLut.style === 'cinematic' ? 'rgba(255,140,0,0.15)' : previewLut.style === 'vintage' ? 'rgba(180,130,80,0.2)' : previewLut.style === 'urban' ? 'rgba(0,150,255,0.12)' : previewLut.style === 'japanese' ? 'rgba(255,150,180,0.12)' : 'transparent' }} />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-1.5 flex-wrap mb-3">
+              {previewLut.tags?.map(t => (
+                <span key={t} className="text-xs px-2 py-0.5 rounded-full"
+                  style={{ background: 'var(--theme-bg)', color: 'var(--theme-text-secondary)' }}>{t}</span>
               ))}
             </div>
+            <p className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+              适用: {previewLut.use_case?.join(' / ') || '通用'}
+            </p>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AssetCard({ item, isPlaying, onPlay, onPreview }: {
+  item: Record<string, unknown> & { _type: string }
+  isPlaying: boolean
+  onPlay: () => void
+  onPreview: () => void
+}) {
+  const t = item._type
+  const name = (item.name_cn as string) || (item.name as string) || '未命名'
+  const tags = (item.tags as string[]) || []
+  const mood = (item.mood as string[]) || []
+
+  return (
+    <div className="p-4 rounded-lg transition-all hover:scale-[1.01]"
+      style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', borderRadius: 'var(--theme-radius-md)' }}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs px-2 py-0.5 rounded font-medium"
+          style={{ background: 'var(--theme-bg)', color: 'var(--theme-accent)' }}>{t}</span>
+        <div className="flex gap-2">
+          {t === 'BGM' && (
+            <>
+              <span className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+                {item.bpm ? `${item.bpm} BPM` : ''} {(item as BgmItem).duration_sec ? `${Math.round((item as BgmItem).duration_sec / 60)}:${String(Math.round((item as BgmItem).duration_sec % 60)).padStart(2, '0')}` : ''}
+              </span>
+              <button onClick={onPlay}
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-all"
+                style={{ background: isPlaying ? 'var(--theme-accent)' : 'var(--theme-bg)', color: isPlaying ? '#fff' : 'var(--theme-text-secondary)' }}>
+                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+              </button>
+            </>
+          )}
+          {t === 'SFX' && (
+            <button onClick={onPlay}
+              className="w-7 h-7 rounded-full flex items-center justify-center"
+              style={{ background: isPlaying ? 'var(--theme-accent)' : 'var(--theme-bg)', color: isPlaying ? '#fff' : 'var(--theme-text-secondary)' }}>
+              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+            </button>
+          )}
+          {t === 'LUT' && (
+            <button onClick={onPreview}
+              className="flex items-center gap-1 text-xs font-medium"
+              style={{ color: 'var(--theme-accent)' }}>
+              <Eye size={14} /> 预览效果
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="font-medium text-sm mb-2" style={{ color: 'var(--theme-text)' }}>{name}</div>
+      <div className="flex gap-1.5 flex-wrap">
+        {[...tags, ...mood].slice(0, 5).map((tag: string) => (
+          <span key={tag} className="text-xs px-2 py-0.5 rounded-full"
+            style={{ background: 'var(--theme-bg)', color: 'var(--theme-text-secondary)' }}>{tag}</span>
         ))}
       </div>
     </div>

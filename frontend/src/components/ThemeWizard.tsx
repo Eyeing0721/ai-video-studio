@@ -28,13 +28,8 @@ export default function ThemeWizard() {
         className="fixed inset-0 z-50 flex items-center justify-center"
         style={{ background: 'rgba(0,0,0,0.5)' }}
       >
-        <div
-          className="w-[480px] p-8 rounded-2xl shadow-2xl"
-          style={{
-            background: 'var(--theme-surface)',
-            borderRadius: 'var(--theme-radius-lg)',
-          }}
-        >
+        <div className="w-[480px] p-8 rounded-2xl glass-strong"
+          style={{ borderRadius: 'var(--theme-radius-lg)' }}>
           <h2 className="text-2xl font-semibold mb-2" style={{ color: 'var(--theme-text)' }}>
             欢迎使用 AI Video Studio
           </h2>
