@@ -27,31 +27,36 @@
   }
 }
 
-/* Liquid Glass — multi-layer glassmorphism (macOS Ventura style) */
-.glass {
-  background:
-    radial-gradient(ellipse at 20% 20%, color-mix(in srgb, var(--theme-accent) 8%, transparent) 0%, transparent 70%),
-    radial-gradient(ellipse at 80% 80%, color-mix(in srgb, var(--theme-surface) 12%, transparent) 0%, transparent 70%),
-    color-mix(in srgb, var(--theme-surface) 65%, transparent);
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
-  border: 1px solid color-mix(in srgb, var(--theme-border) 40%, transparent);
-  box-shadow:
-    0 4px 24px -1px rgb(0 0 0 / 0.06),
-    0 2px 8px -2px rgb(0 0 0 / 0.04),
-    inset 0 1px 0 rgb(255 255 255 / 0.06);
+/* Liquid Glass — multi-layer glassmorphism, blur level from theme */
+.glass-sidebar {
+  background: color-mix(in srgb, var(--theme-surface) 55%, transparent);
+  backdrop-filter: blur(var(--blur-sidebar, 12px)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur-sidebar, 12px)) saturate(1.2);
+  border-right: 1px solid color-mix(in srgb, var(--theme-border) 30%, transparent);
+  box-shadow: 2px 0 24px rgb(0 0 0 / 0.04);
 }
-.glass-strong {
+.glass-card {
+  background: color-mix(in srgb, var(--theme-surface) 70%, transparent);
+  backdrop-filter: blur(var(--blur-card, 8px)) saturate(1.1);
+  -webkit-backdrop-filter: blur(var(--blur-card, 8px)) saturate(1.1);
+  border: 1px solid color-mix(in srgb, var(--theme-border) 35%, transparent);
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.04);
+}
+.glass-modal {
   background:
-    radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--theme-accent) 6%, transparent) 0%, transparent 60%),
-    color-mix(in srgb, var(--theme-surface) 82%, transparent);
-  backdrop-filter: blur(28px) saturate(1.5);
-  -webkit-backdrop-filter: blur(28px) saturate(1.5);
-  border: 1px solid color-mix(in srgb, var(--theme-border) 50%, transparent);
-  box-shadow:
-    0 8px 32px -4px rgb(0 0 0 / 0.08),
-    0 4px 12px -4px rgb(0 0 0 / 0.04),
-    inset 0 1px 0 rgb(255 255 255 / 0.08);
+    radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--theme-accent) 5%, transparent) 0%, transparent 60%),
+    color-mix(in srgb, var(--theme-surface) 75%, transparent);
+  backdrop-filter: blur(var(--blur-modal, 20px)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--blur-modal, 20px)) saturate(1.4);
+  border: 1px solid color-mix(in srgb, var(--theme-border) 45%, transparent);
+  box-shadow: 0 8px 32px -4px rgb(0 0 0 / 0.1), 0 4px 12px -4px rgb(0 0 0 / 0.06);
+}
+.glass-panel {
+  background: color-mix(in srgb, var(--theme-surface) 80%, transparent);
+  backdrop-filter: blur(var(--blur-panel, 4px)) saturate(1.05);
+  -webkit-backdrop-filter: blur(var(--blur-panel, 4px)) saturate(1.05);
+  border: 1px solid color-mix(in srgb, var(--theme-border) 40%, transparent);
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.03);
 }
 
 /* Page mount animation */

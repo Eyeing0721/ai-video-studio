@@ -14,7 +14,7 @@ export default function Layout() {
   const location = useLocation()
   return (
     <div className="flex h-screen" style={{ background: 'var(--theme-bg)' }}>
-      <nav className="w-56 shrink-0 flex flex-col gap-1 p-4 glass"
+      <nav className="w-56 shrink-0 flex flex-col gap-1 p-4 glass-sidebar"
         style={{ borderColor: 'var(--theme-border)' }}
       >
         <div className="text-lg font-bold tracking-tight mb-6 px-2" style={{ color: 'var(--theme-accent)' }}>

@@ -93,10 +93,11 @@ _workflow_fetcher_task = None
 # ── Static media files ────────────────────────────────
 
 from fastapi.staticfiles import StaticFiles
-import os
-media_dir = os.path.join(os.path.dirname(__file__), '..', 'media_library')
-if os.path.isdir(media_dir):
-    app.mount("/media", StaticFiles(directory=media_dir), name="media")
+import os as _os
+_media_dir = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', 'media_library'))
+if _os.path.isdir(_media_dir):
+    app.mount("/media", StaticFiles(directory=_media_dir), name="media")
+    logger.info(f"Media served from: {_media_dir}")
 
 
 # ── Routes ──────────────────────────────────────────────
