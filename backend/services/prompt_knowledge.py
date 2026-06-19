@@ -7,6 +7,22 @@ Total knowledge: ~25,000 characters across 12 modules.
 """
 
 # ═══════════════════════════════════════════════════════════
+# MODULE 0: Resolution Pipeline Strategy (CRITICAL)
+# ═══════════════════════════════════════════════════════════
+
+RESOLUTION_STRATEGY = """
+RESOLUTION PIPELINE STRATEGY:
+
+Z-Image T2I → Sulphur I2V: generate 1024×1024 image, use as-is for Sulphur I2V
+Z-Image T2I → Wan I2V: generate 1024×1024 image, resize to 640×640 for Wan, upscale 4x after
+Sulphur I2V → compositing: output at 1024×1024 or 1088×608 (16:9)
+Wan I2V → compositing: output at 640×640, upscale to 2560×2560 or 1920×1080
+
+Always generate images slightly LARGER than the I2V target so downscaling preserves detail.
+Match aspect ratios: all shots in a scene must use the same aspect ratio (16:9 preferred for video).
+"""
+
+# ═══════════════════════════════════════════════════════════
 # MODULE 1: First-Frame Principle (CRITICAL)
 # ═══════════════════════════════════════════════════════════
 
@@ -212,7 +228,8 @@ STATIC (contemplative — only when motivated):
   USE SPARINGLY — every other shot should have movement
 
 KEY RULES:
-1. ONE camera move per shot. Multiple simultaneous moves cause video artifacts.
+1. One PRIMARY camera move per shot. Simple combined moves (dolly+zoom, push+pan) are acceptable.
+   Avoid 3+ simultaneous axes which cause video artifacts.
 2. Describe speed: "slow", "gentle", "subtle", "gradual" or "fast", "rapid", "dramatic"
 3. Describe direction: "left to right", "bottom to top", "clockwise", "toward subject"
 4. Match movement to emotion: push= intensify, pull= isolate, handheld= tension
@@ -439,11 +456,13 @@ PROMPT_VIDEO FORMAT:
   DO describe: camera direction + speed + subject movement + expression change
   DO NOT describe: visual appearance, colors, clothing, environment (image has these)
 
-  Always include: "no speech, no dialogue, silent, instrumental only" (for Sulphur)
+  For video without speech: put "no speech, no dialogue, silent" in the NEGATIVE prompt
+  (positive prompt describes desired motion only; negation in positive prompt backfires at CFG>1)
 
-  Example prompt_video: "Slow dolly in toward subject's face. Subject's eyes widen
-  slightly, jaw tightens. Subtle micro-shake from handheld breathing. Camera pushes
-  forward gradually through dusty air. No speech, no dialogue, silent."
+  Example prompt_video (motion + camera only): "Slow dolly in toward subject's face.
+  Subject's eyes widen slightly, jaw tightens. Subtle micro-shake from handheld
+  breathing. Camera pushes forward gradually through dusty air."
+  Example negative prompt_video: "no speech, no dialogue, silent, static image"
 """
 
 # ═══════════════════════════════════════════════════════════
@@ -461,15 +480,15 @@ Steps: 8 (sweet spot), range 4-9
 CFG: 1.0 (MANDATORY — model designed for this)
 Scheduler: Beta or Simple
 Resolution: 1024×1024 standard, portrait 832×1216, landscape 1216×832
-Prompt Length: 80-300 words optimal (longer may truncate)
+Prompt Length: 50-150 words optimal (Qwen3-4B text encoder; empirical safe zone ~20-70 tokens before degradation)
 
 CRITICAL: At CFG 1.0, negative prompts are SILENTLY IGNORED.
 Do NOT use negative prompts. Bake all exclusions into positive prompt.
 Instead of "no text, no watermark" → "clean professional photograph, no overlays"
 
 ANTI-PATTERNS:
-✗ CFG > 2.0 (10x slower, saturation artifacts)
-✗ Negative prompts (ignored, wastes tokens)
+✗ CFG > 2.0 (saturation/contrast artifacts, NOT slower — CFG doesn't affect inference speed)
+✗ Negative prompts (ignored at CFG 1.0, wastes tokens)
 ✗ Contradictory style words ("photorealistic cartoon")
 ✗ Vague descriptors ("beautiful", "nice", "good")
 ✗ Over 300 word prompts (truncation risk)
@@ -606,6 +625,7 @@ ATTENTION RESET:
 def get_prompt_knowledge() -> str:
     """Return all knowledge modules concatenated."""
     modules = [
+        RESOLUTION_STRATEGY,
         FIRST_FRAME_RULE,
         HYPERREALISTIC_PROTOCOL,
         PROMPT_CONSTRUCTION,
@@ -625,6 +645,7 @@ def get_prompt_knowledge() -> str:
 def get_module(name: str) -> str:
     """Get a specific knowledge module by name."""
     modules = {
+        "resolution": RESOLUTION_STRATEGY,
         "first_frame": FIRST_FRAME_RULE,
         "hyperrealistic": HYPERREALISTIC_PROTOCOL,
         "prompt_formula": PROMPT_CONSTRUCTION,
