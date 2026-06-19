@@ -18,7 +18,11 @@ export default function useWebSocket({ taskId, onMessage }: UseWebSocketOptions)
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closedByUserRef = useRef(false)
   const onMessageRef = useRef(onMessage)
-  onMessageRef.current = onMessage
+  const connectRef = useRef<() => void>(() => {})
+
+  useEffect(() => {
+    onMessageRef.current = onMessage
+  })
 
   const clearRetryTimer = () => {
     if (retryTimerRef.current !== null) {
@@ -57,7 +61,7 @@ export default function useWebSocket({ taskId, onMessage }: UseWebSocketOptions)
       const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 30000)
       retryCountRef.current += 1
       retryTimerRef.current = setTimeout(() => {
-        connect()
+        connectRef.current()
       }, delay)
     }
 
@@ -65,6 +69,10 @@ export default function useWebSocket({ taskId, onMessage }: UseWebSocketOptions)
       // onclose will fire after onerror, reconnection handled there
     }
   }, [taskId])
+
+  useEffect(() => {
+    connectRef.current = connect
+  })
 
   useEffect(() => {
     closedByUserRef.current = false

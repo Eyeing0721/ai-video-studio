@@ -86,16 +86,16 @@ export default function TextCreation() {
         <div className="flex flex-col gap-3">
           {mode === 'structured' ? (
             <>
-              {[
-                ['characters', '角色名称', '如"林小月, 25岁, 都市白领"'],
-                ['persona', '角色人设（性格、背景、目标）', '如"内向但坚韧, 家庭压力大, 渴望自由"'],
-                ['world', '世界观（修仙/科幻/都市/奇幻等）', '如"近未来赛博朋克都市"'],
-                ['style', '风格（搞笑/悬疑/言情/热血等）', '如"悬疑+言情"'],
-                ['plot', '剧情走向', '如"主角深入连环失踪案, 发现真相与自己有关"'],
-              ].map(([key, label, placeholder]) => (
+              {([
+                ['characters', '角色名称', '如"林小月, 25岁, 都市白领"', characters, setCharacters],
+                ['persona', '角色人设（性格、背景、目标）', '如"内向但坚韧, 家庭压力大, 渴望自由"', persona, setPersona],
+                ['world', '世界观（修仙/科幻/都市/奇幻等）', '如"近未来赛博朋克都市"', world, setWorld],
+                ['style', '风格（搞笑/悬疑/言情/热血等）', '如"悬疑+言情"', style, setStyle],
+                ['plot', '剧情走向', '如"主角深入连环失踪案, 发现真相与自己有关"', plot, setPlot],
+              ] as [string, string, string, string, React.Dispatch<React.SetStateAction<string>>][]).map(([key, label, placeholder, value, setter]) => (
                 <div key={key}>
                   <div className="text-xs font-medium mb-1" style={{ color: 'var(--theme-text-secondary)' }}>{label}</div>
-                  <input placeholder={placeholder}
+                  <input placeholder={placeholder} value={value} onChange={(e) => setter(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg text-sm"
                     style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)', border: '1px solid var(--theme-border)', borderRadius: 'var(--theme-radius-md)' }}
                   />

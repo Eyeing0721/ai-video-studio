@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useThemeCtx } from '../App'
+import { useState } from 'react'
+import { useThemeCtx } from '../hooks/useThemeCtx'
 import { PRESETS } from '../lib/themes'
 import type { ThemePreset } from '../types/theme'
 
@@ -7,13 +7,8 @@ const PRESET_ORDER: ThemePreset[] = ['light', 'dark', 'mocha', 'sakura', 'synthw
 
 export default function ThemeWizard() {
   const { switchPreset } = useThemeCtx()
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState(() => localStorage.getItem('ai-video-studio-wizard-done') === null)
   const [step, setStep] = useState(0)
-
-  useEffect(() => {
-    const seen = localStorage.getItem('ai-video-studio-wizard-done')
-    if (!seen) setShow(true)
-  }, [])
 
   if (!show) return null
 

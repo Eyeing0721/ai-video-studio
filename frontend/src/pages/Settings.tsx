@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useThemeCtx } from '../App'
+import { useThemeCtx } from '../hooks/useThemeCtx'
 import { PRESETS } from '../lib/themes'
 import type { ThemePreset, ThemeConfig } from '../types/theme'
 

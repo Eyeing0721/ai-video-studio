@@ -47,7 +47,7 @@ export default function TaskDetail() {
   const [task, setTask] = useState<TaskData | null>(null)
   const [logs, setLogs] = useState<string[]>([])
 
-  const { connected } = useWebSocket({
+  useWebSocket({
     taskId: id!,
     onMessage: (msg) => {
       if (msg.type === 'status') {

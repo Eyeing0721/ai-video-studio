@@ -258,6 +258,24 @@ async def get_template(template_id: str):
     return t
 
 
+# ── BGM Library ───────────────────────────────────────
+
+@app.get("/api/bgm")
+async def bgm_search(mood: str = "", genre: str = "", bpm_min: int = 0, bpm_max: int = 300):
+    from services.bgm_library import search_bgm
+    return search_bgm(
+        mood=mood if mood else None,
+        genre=genre if genre else None,
+        bpm_min=bpm_min if bpm_min > 0 else None,
+        bpm_max=bpm_max if bpm_max < 300 else None,
+    )
+
+@app.get("/api/bgm/recommend")
+async def bgm_recommend(template: str = "micro_drama"):
+    from services.bgm_library import recommend_for_template
+    return recommend_for_template(template)
+
+
 # ── Text Creation ──────────────────────────────────────
 
 @app.post("/api/text/continue")
