@@ -103,3 +103,81 @@
 .live-dot {
   animation: pulse-dot 1.5s ease-in-out infinite;
 }
+
+/* ── Transitions & Micro-interactions ──────────────────── */
+
+/* Smooth page routing */
+.page-enter {
+  animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Card hover lift */
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Button press */
+.btn-press:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+/* Stagger children animation */
+.stagger > * {
+  animation: fadeInUp 0.4s ease-out both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(6) { animation-delay: 300ms; }
+.stagger > *:nth-child(7) { animation-delay: 360ms; }
+.stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+/* Smooth theme toggle */
+.theme-transition,
+.theme-transition * {
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.3s ease !important;
+}
+
+/* Modal scale-in */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-enter {
+  animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Progress bar shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.1) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Floating glow pulse */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgb(255 255 255 / 0.05); }
+  50% { box-shadow: 0 0 20px rgb(255 255 255 / 0.12); }
+}
+.glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
