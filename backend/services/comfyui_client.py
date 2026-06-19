@@ -791,23 +791,43 @@ class ComfyUIClient:
         on_preview=None,
         timeout: int = 600,
     ) -> dict:
-        """Submit workflow, wait for completion, return outputs."""
+        """Submit workflow, poll until completion, return outputs.
+
+        Uses polling (GET /history/{prompt_id}) instead of WebSocket
+        for reliability — WebSocket may drop during long GPU operations.
+        """
         prompt_id = await self.queue_prompt(workflow)
         logger.info(f"ComfyUI prompt submitted: {prompt_id}")
 
-        outputs = {}
-        try:
-            outputs = await asyncio.wait_for(
-                self.ws_listen(prompt_id, on_progress, on_preview),
-                timeout=timeout,
-            )
-        except asyncio.TimeoutError:
-            logger.error(f"ComfyUI workflow timed out after {timeout}s, prompt_id={prompt_id}")
-            raise
-        finally:
-            await self.ws_close()
+        deadline = asyncio.get_event_loop().time() + timeout
+        last_status: dict | None = None
 
-        return {"prompt_id": prompt_id, "outputs": outputs}
+        while asyncio.get_event_loop().time() < deadline:
+            try:
+                history = await self.get_history(prompt_id)
+                if prompt_id in history:
+                    entry = history[prompt_id]
+                    outputs = entry.get("outputs", {})
+                    status_msg = entry.get("status", {})
+                    if status_msg.get("completed", True):
+                        elapsed = timeout - (deadline - asyncio.get_event_loop().time())
+                        logger.info(f"ComfyUI workflow {prompt_id[:8]} completed in {elapsed:.1f}s")
+                        return {"prompt_id": prompt_id, "outputs": outputs}
+                    last_status = status_msg
+            except Exception as e:
+                logger.warning(f"ComfyUI poll error for {prompt_id[:8]}: {e}")
+
+            await asyncio.sleep(2.0)  # Poll every 2 seconds
+
+        logger.error(f"ComfyUI workflow {prompt_id[:8]} timed out after {timeout}s")
+        # Return partial results even on timeout
+        try:
+            history = await self.get_history(prompt_id)
+            if prompt_id in history:
+                return {"prompt_id": prompt_id, "outputs": history[prompt_id].get("outputs", {})}
+        except Exception:
+            pass
+        raise asyncio.TimeoutError(f"Workflow {prompt_id[:8]} did not complete within {timeout}s")
 
 
 # Singleton

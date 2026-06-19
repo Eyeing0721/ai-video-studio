@@ -53,10 +53,14 @@ STORYBOARD_SYSTEM = """你是一位资深电影摄影师和分镜师。运用纪
 - action: 画面内发生的动作 (15-40字)
 - dialogue: 台词或旁白 (可为空字符串)
 - mood: 情感氛围 (3-6个中文词)
-- camera_motion: static / slow_push_in / slow_pull_out / pan_left / pan_right / tilt_up / tilt_down / handheld / dolly / crane
-  * 手持(handheld)用于紧张/混乱/纪录片感
-  * 推轨(dolly)用于揭示/追踪
-  * 静态(static)用于观察/让画面说话
+- camera_motion: 【必须选择，不能用static】slow_push_in / slow_pull_out / pan_left / pan_right / tilt_up / tilt_down / handheld / dolly / crane / orbit / dutch_angle_tilt
+  * 每个镜头必须有摄影机运动！即使是对话镜头也要有微小的推拉或手持微晃
+  * handheld: 紧张/混乱/纪录片临场感（微晃0.5-2cm幅度）
+  * slow_push_in: 情绪递进/揭示/紧张升级
+  * dolly/追踪: 跟随角色动作
+  * orbit: 环绕角色制造空间感
+  * pan/tilt: 展示环境/角色视线引导
+  * action描述中也要体现运镜产生的画面变化（如"镜头缓缓推近，他的表情从阴影中逐渐显现"）
 - lighting: 具体光效——光源类型+方向+色温+阴影特性
 
 【最高优先级】场景与人物一致性圣经：
