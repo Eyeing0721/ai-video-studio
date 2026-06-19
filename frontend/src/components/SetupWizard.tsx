@@ -12,16 +12,19 @@ interface CheckItem {
 }
 
 export default function SetupWizard({ onDone }: { onDone: () => void }) {
+  const [show, setShow] = useState(true)
   const [checks, setChecks] = useState<CheckItem[]>([])
   const [overall, setOverall] = useState<'checking' | 'ready' | 'blocked'>('checking')
 
   useEffect(() => {
     const themeDone = localStorage.getItem('ai-video-studio-wizard-done')
     const setupDone = localStorage.getItem('avs-setup-done')
-    if (setupDone) { onDone(); return }
-    if (!themeDone) return  // wait for theme wizard to finish first
+    if (setupDone) { setShow(false); onDone(); return }
+    if (!themeDone) { setShow(false); return }
     runChecks()
   }, [])
+
+  if (!show) return null
 
   const runChecks = async () => {
     const items: CheckItem[] = [
@@ -86,8 +89,11 @@ export default function SetupWizard({ onDone }: { onDone: () => void }) {
     }
   }
 
+  if (!show) return null
+
   const finish = () => {
     localStorage.setItem('avs-setup-done', '1')
+    setShow(false)
     onDone()
   }
 
