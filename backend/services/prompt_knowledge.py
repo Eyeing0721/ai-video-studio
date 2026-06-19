@@ -27,10 +27,7 @@ Match aspect ratios: all shots in a scene must use the same aspect ratio (16:9 p
 # ═══════════════════════════════════════════════════════════
 
 FIRST_FRAME_RULE = """
-╔══════════════════════════════════════════════════════════════╗
-║  CRITICAL: FIRST-FRAME PRINCIPLE — IMAGE = SETUP, VIDEO = PAYOFF ║
-╚══════════════════════════════════════════════════════════════╝
-
+##CRITICAL: FIRST-FRAME PRINCIPLE — IMAGE = SETUP, VIDEO = PAYOFF
 The generated image IS the first frame of the video.
 Therefore every prompt_image MUST capture the MOMENT BEFORE the action.
 
@@ -58,10 +55,7 @@ The viewer should feel "this is about to happen" — not "this is happening."
 # ═══════════════════════════════════════════════════════════
 
 HYPERREALISTIC_PROTOCOL = """
-╔══════════════════════════════════════════════════════════════╗
-║  HYPERREALISTIC PHOTOGRAPHY PROTOCOL — MANDATORY ║
-╚══════════════════════════════════════════════════════════════╝
-
+##HYPERREALISTIC PHOTOGRAPHY PROTOCOL — MANDATORY
 CAMERA SYSTEM:
 - Shot on Arri Alexa 65 with Panavision Primo lenses
 - 35mm film grain (Kodak Portra 400 color science)
@@ -106,10 +100,7 @@ WHAT TO AVOID (ANTI-AI):
 # ═══════════════════════════════════════════════════════════
 
 PROMPT_CONSTRUCTION = """
-╔══════════════════════════════════════════════════════════════╗
-║  PROMPT CONSTRUCTION FORMULA — LAYER BY LAYER ║
-╚══════════════════════════════════════════════════════════════╝
-
+##PROMPT CONSTRUCTION FORMULA — LAYER BY LAYER
 Every prompt_image must follow this 8-layer construction:
 
 LAYER 1 — QUALITY MODIFIERS (prepend to every prompt):
@@ -174,10 +165,7 @@ moody cinematography, masterpiece."
 # ═══════════════════════════════════════════════════════════
 
 CAMERA_ENCYCLOPEDIA = """
-╔══════════════════════════════════════════════════════════════╗
-║  CAMERA MOVEMENT ENCYCLOPEDIA — 17 TECHNIQUES ║
-╚══════════════════════════════════════════════════════════════╝
-
+##CAMERA MOVEMENT ENCYCLOPEDIA — 17 TECHNIQUES
 PUSH MOVEMENTS (toward subject — intensify, reveal detail):
   slow dolly in — camera physically moves forward, background expands, subject grows
   creeping zoom — lens focal length increases, compresses space, isolates subject
@@ -240,10 +228,7 @@ KEY RULES:
 # ═══════════════════════════════════════════════════════════
 
 CHARACTER_BIBLE = """
-╔══════════════════════════════════════════════════════════════╗
-║  CHARACTER BIBLE SYSTEM — IDENTITY LOCKING ║
-╚══════════════════════════════════════════════════════════════╝
-
+##CHARACTER BIBLE SYSTEM — IDENTITY LOCKING
 Each character must be defined ONCE in the characters array, then referenced
 consistently in every shot. The AI must copy the exact same description.
 
@@ -308,10 +293,7 @@ CHARACTER CONSISTENCY RULES:
 # ═══════════════════════════════════════════════════════════
 
 SCENE_CONTINUITY = """
-╔══════════════════════════════════════════════════════════════╗
-║  SCENE CONTINUITY SYSTEM — SPATIAL LOCKING ║
-╚══════════════════════════════════════════════════════════════╝
-
+##SCENE CONTINUITY SYSTEM — SPATIAL LOCKING
 The scene must be defined ONCE in the scene object, then EVERY shot
 must maintain spatial consistency.
 
@@ -356,10 +338,7 @@ SPATIAL CONTINUITY RULES:
 # ═══════════════════════════════════════════════════════════
 
 DIRECTOR_STYLE_REFERENCE = """
-╔══════════════════════════════════════════════════════════════╗
-║  DIRECTOR & FILM STYLE REFERENCE ║
-╚══════════════════════════════════════════════════════════════╝
-
+##DIRECTOR & FILM STYLE REFERENCE
 When a style is specified, apply its visual language to ALL shots.
 
 WES ANDERSON — symmetrical composition, pastel candy colors, centered framing,
@@ -413,10 +392,7 @@ on-location shooting, 1960s Parisian, existential mood, jump cuts, spontaneous
 # ═══════════════════════════════════════════════════════════
 
 VIDEO_TECH_REFERENCE = """
-╔══════════════════════════════════════════════════════════════╗
-║  VIDEO GENERATION TECHNICAL REFERENCE ║
-╚══════════════════════════════════════════════════════════════╝
-
+##VIDEO GENERATION TECHNICAL REFERENCE
 SULPHUR 2 / LTX 2.3 (primary model):
   Architecture: 22B DiT (Lightricks LTX 2.3 base), MIT license, T2V + I2V + audio native
   Resolution: up to 4K (divisible by 32), 1024×1024 or 1088×608 (16:9) for 16GB GGUF Q4
@@ -470,10 +446,7 @@ PROMPT_VIDEO FORMAT:
 # ═══════════════════════════════════════════════════════════
 
 ZIMAGE_REFERENCE = """
-╔══════════════════════════════════════════════════════════════╗
-║  Z-IMAGE TURBO — STILL IMAGE GENERATION ║
-╚══════════════════════════════════════════════════════════════╝
-
+##Z-IMAGE TURBO — STILL IMAGE GENERATION
 Model: 6B S3-DiT, few-step distilled text-to-image
 Sampler: Euler (primary), DPM++ 2M Karras (alternative)
 Steps: 8 (sweet spot), range 4-9
@@ -508,10 +481,7 @@ Model file: z_image_turbo_bf16.safetensors
 # ═══════════════════════════════════════════════════════════
 
 EDITING_REFERENCE = """
-╔══════════════════════════════════════════════════════════════╗
-║  EDITING & PACING REFERENCE ║
-╚══════════════════════════════════════════════════════════════╝
-
+##EDITING & PACING REFERENCE
 MICRO-DRAMA PACING (60-120 second content):
   Hook (0-15s): immediate conflict reveal, no setup, grab attention in 3 seconds
   Friction (15-60s): visible conflict escalation, each line advances conflict
@@ -549,10 +519,7 @@ BGM DUCKING:
 # ═══════════════════════════════════════════════════════════
 
 CINEMATIC_GRAMMAR = """
-╔══════════════════════════════════════════════════════════════╗
-║  CINEMATIC SHOT GRAMMAR ║
-╚══════════════════════════════════════════════════════════════╝
-
+##CINEMATIC SHOT GRAMMAR
 SHOT SIZE PROGRESSION:
   Establishing (wide) → Medium coverage → Close-up reveal → Return to wide (breather)
   Each cut should jump at least 2 shot sizes (wide→close-up, not wide→medium)
@@ -594,10 +561,7 @@ COMPOSITION RULES:
 # ═══════════════════════════════════════════════════════════
 
 PROFESSIONAL_WORKFLOW = """
-╔══════════════════════════════════════════════════════════════╗
-║  PROFESSIONAL EDITING WORKFLOW ║
-╚══════════════════════════════════════════════════════════════╝
-
+##PROFESSIONAL EDITING WORKFLOW
 9-STEP EDITING PIPELINE (industry standard):
   1. MATERIAL REVIEW: watch ALL footage 1-2 times, note key moments, log shots
   2. STORY STRUCTURE: outline narrative arc, identify emotional beats, plan rhythm
