@@ -1,13 +1,13 @@
 import type { ThemeConfig, ThemePreset } from '../types/theme'
 
-// AI-generated wallpapers (Z-Image Turbo) + CSS gradient fallback
+// Theme wallpapers — real photos for scenic, CSS textures for minimal
 const WALLPAPERS: Record<string, string> = {
-  light: 'url(/media/wallpapers/light.png), linear-gradient(135deg, #F4F3F0, #E5E0DA)',
-  dark: 'url(/media/wallpapers/dark.png), linear-gradient(135deg, #1A1B1E, #15161A)',
-  mocha: 'url(/media/wallpapers/mocha.png), linear-gradient(135deg, #D4C4B0, #F5EFE8)',
-  sakura: 'url(/media/wallpapers/sakura.png), linear-gradient(135deg, #FDF6F5, #FEDFE1)',
-  synthwave: 'url(/media/wallpapers/synthwave.png), linear-gradient(180deg, #0A0020, #FF4470)',
-  tokyo: 'url(/media/wallpapers/tokyo.png), linear-gradient(180deg, #0A0F25, #1A1D2E)',
+  light: 'none',
+  dark: 'none',
+  mocha: 'none',
+  sakura: 'url(/media/wallpapers/sakura.png)',
+  synthwave: 'url(/media/wallpapers/synthwave.png)',
+  tokyo: 'url(/media/wallpapers/tokyo.jpg)',
 }
 
 export const PRESETS: Record<ThemePreset, ThemeConfig> = {
@@ -86,6 +86,13 @@ export function applyTheme(config: ThemeConfig) {
   document.body.style.backgroundImage = config.wallpaper
   document.body.style.backgroundSize = 'cover'
   document.body.style.backgroundAttachment = 'fixed'
+  // Texture class for themes without photo wallpaper
+  document.body.classList.remove('texture-light', 'texture-dark', 'texture-mocha')
+  if (config.wallpaper === 'none') {
+    if (config.name.includes('浅色') || config.name === 'light') document.body.classList.add('texture-light')
+    else if (config.name.includes('深色') || config.name === 'dark') document.body.classList.add('texture-dark')
+    else if (config.name.includes('摩卡')) document.body.classList.add('texture-mocha')
+  }
 
   const isDark = ['dark', 'synthwave', 'tokyo-night'].includes(config.name)
   document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'

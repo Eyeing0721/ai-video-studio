@@ -13,6 +13,27 @@
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+    /* Modern noise texture — subtle grain over everything */
+    position: relative;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* Subtle geometric texture for themes without photo wallpaper */
+  body.texture-light {
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px),
+                      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px);
+  }
+  body.texture-dark {
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px),
+                      radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.03) 0%, transparent 60%);
+  }
+  body.texture-mocha {
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(164,120,100,0.04) 8px, rgba(164,120,100,0.04) 9px),
+                      radial-gradient(ellipse at 30% 20%, rgba(164,120,100,0.06) 0%, transparent 50%);
   }
   /* Background blur overlay — adjustable frosted glass over wallpaper */
   #bg-frost {
