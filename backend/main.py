@@ -306,6 +306,27 @@ async def analyze_audio(file: UploadFile):
         Path(tmp_path).unlink(missing_ok=True)
 
 
+# ── SFX Library ────────────────────────────────────────
+
+@app.get("/api/sfx")
+async def list_sfx(type: str = "", tag: str = ""):
+    from services.sfx_library import search_sfx
+    return search_sfx(
+        sfx_type=type if type else None,
+        tags=[tag] if tag else None,
+    )
+
+@app.get("/api/sfx/reverb")
+async def sfx_reverb(scene: str = ""):
+    from services.sfx_library import get_reverb_ir
+    return get_reverb_ir(scene)
+
+@app.get("/api/audio/presets")
+async def audio_presets():
+    from services.sfx_library import AUDIO_PRESETS
+    return AUDIO_PRESETS
+
+
 # ── Text Creation ──────────────────────────────────────
 
 @app.post("/api/text/continue")
