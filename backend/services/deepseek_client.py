@@ -222,6 +222,74 @@ async def structured_create(
     return data["content"][0]["text"] if isinstance(data["content"], list) else data["content"]
 
 
+async def auto_edit_instruction(
+    instruction: str,
+    current_recipe: dict,
+    api_key: str = API_KEY,
+) -> dict:
+    """Translate natural language editing instructions into concrete parameter changes.
+
+    Given a user instruction like '把第二幕氛围调暗一些' or '转场不要太花哨',
+    returns a dict of parameter adjustments for the MLT pipeline and template recipe.
+    """
+    recipe_json = json.dumps(current_recipe, ensure_ascii=False, indent=2)
+    system = """你是一位资深视频后期导演。用户会用自然语言描述想要的剪辑效果调整。
+请分析指令，输出一个JSON对象，包含具体可执行的参数修改。
+
+可调整的参数：
+- transitions.type: 转场类型 (cross_dissolve, hard_cut, fade_out, wipe_left, zoom_in, dip_to_black, flash_white)
+- transitions.duration_sec: 转场时长 (0.1-2.0)
+- subtitles.font_size: 字幕字号
+- subtitles.color: 字幕颜色
+- subtitles.animation: 字幕动画 (fade, cut, pop, slide)
+- bgm.ducking_ratio: BGM闪避比例 (0-1)
+- bgm.volume_db: BGM音量
+- color.contrast: 对比度 (0.5-2.0)
+- color.saturation: 饱和度 (0-2.0)
+- color.brightness: 亮度 (-1到1)
+- timing.shot_duration_min: 最小镜头时长(秒)
+- timing.shot_duration_max: 最大镜头时长(秒)
+- global.vignette_intensity: 暗角强度 (0-1)
+- global.film_grain: 胶片颗粒 (0-1)
+
+只输出需要修改的参数，不改的不要输出。输出纯JSON，不要markdown包裹。
+
+当前设置作为参考：
+{recipe}
+
+用户指令：{instruction}"""
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",
+    }
+    body = {
+        "model": MODEL,
+        "max_tokens": 1024,
+        "system": system.format(recipe=recipe_json[:3000], instruction=instruction),
+        "messages": [{"role": "user", "content": instruction}],
+        "temperature": 0.3,
+    }
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.post(f"{DEEPSEEK_URL}/v1/messages", headers=headers, json=body)
+        r.raise_for_status()
+        data = r.json()
+
+    content = data["content"][0]["text"] if isinstance(data["content"], list) else data["content"]
+    content = content.strip()
+    if content.startswith("```"):
+        content = content.split("\n", 1)[1]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+
+    adjustments = json.loads(content)
+    logger.info(f"Auto-edit: '{instruction[:50]}...' -> {len(adjustments)} parameter changes")
+    return adjustments
+
+
 async def revise_text(
     original_text: str,
     instruction: str,

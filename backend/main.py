@@ -370,6 +370,29 @@ async def recommend_styles(template: str = "vlog"):
     }
 
 
+# ── Auto-Edit ─────────────────────────────────────────
+
+@app.post("/api/edit/instruct")
+async def auto_edit(data: dict):
+    """Natural language editing instruction → parameter adjustments."""
+    from services.deepseek_client import auto_edit_instruction
+    instruction = data.get("instruction", "")
+    recipe = data.get("recipe", {})
+    result = await auto_edit_instruction(instruction, recipe)
+    return result
+
+@app.post("/api/edit/auto")
+async def auto_edit_video(data: dict):
+    """Upload video clips + NL instruction → auto-edited video."""
+    from services.auto_editor import generate_edit_plan
+    instruction = data.get("instruction", "")
+    videos = data.get("videos", [])  # list of {"path": str, "filename": str, ...}
+    template = data.get("template", "vlog")
+    max_duration = data.get("max_duration_sec", 60)
+    plan = await generate_edit_plan(videos, instruction, template, max_duration)
+    return plan
+
+
 # ── Text Creation ──────────────────────────────────────
 
 @app.post("/api/text/continue")

@@ -19,6 +19,33 @@
   }
 }
 
+/* Liquid Glass — multi-layer glassmorphism (macOS Ventura style) */
+.glass {
+  background:
+    radial-gradient(ellipse at 20% 20%, color-mix(in srgb, var(--theme-accent) 8%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse at 80% 80%, color-mix(in srgb, var(--theme-surface) 12%, transparent) 0%, transparent 70%),
+    color-mix(in srgb, var(--theme-surface) 65%, transparent);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border: 1px solid color-mix(in srgb, var(--theme-border) 40%, transparent);
+  box-shadow:
+    0 4px 24px -1px rgb(0 0 0 / 0.06),
+    0 2px 8px -2px rgb(0 0 0 / 0.04),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+.glass-strong {
+  background:
+    radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--theme-accent) 6%, transparent) 0%, transparent 60%),
+    color-mix(in srgb, var(--theme-surface) 82%, transparent);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid color-mix(in srgb, var(--theme-border) 50%, transparent);
+  box-shadow:
+    0 8px 32px -4px rgb(0 0 0 / 0.08),
+    0 4px 12px -4px rgb(0 0 0 / 0.04),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
 /* Page mount animation */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); }
