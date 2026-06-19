@@ -12,17 +12,17 @@ interface CheckItem {
 }
 
 export default function SetupWizard({ onDone }: { onDone: () => void }) {
-  const [show, setShow] = useState(true)
+  const [show, setShow] = useState(() => {
+    const setupDone = localStorage.getItem('avs-setup-done')
+    const themeDone = localStorage.getItem('ai-video-studio-wizard-done')
+    return !setupDone && !!themeDone
+  })
   const [checks, setChecks] = useState<CheckItem[]>([])
   const [overall, setOverall] = useState<'checking' | 'ready' | 'blocked'>('checking')
 
   useEffect(() => {
-    const themeDone = localStorage.getItem('ai-video-studio-wizard-done')
-    const setupDone = localStorage.getItem('avs-setup-done')
-    if (setupDone) { setShow(false); onDone(); return }
-    if (!themeDone) { setShow(false); return }
-    runChecks()
-  }, [])
+    if (show) runChecks()
+  }, [show])
 
   if (!show) return null
 

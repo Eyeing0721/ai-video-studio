@@ -10,7 +10,25 @@ interface BgmItem { id: string; name: string; genre: string; tags: string[]; moo
 interface LutItem { id: string; name: string; name_cn: string; style: string; tags: string[]; use_case: string[]; url: string }
 interface SfxItem { id: string; name: string; name_cn: string; type: string; tags: string[]; use_case: string[] }
 
-const SAMPLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c3e50"/><stop offset="50%" stop-color="#e74c3c"/><stop offset="100%" stop-color="#f39c12"/></linearGradient></defs><rect width="300" height="200" fill="url(#g)"/><circle cx="180" cy="80" r="30" fill="#fff" opacity="0.8"/><text x="30" y="120" fill="#fff" font-size="14" font-family="sans">Sample Preview</text></svg>')
+const SAMPLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="280">' +
+  '<defs>' +
+    '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A90D9"/><stop offset="60%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#B8D4E8"/></linearGradient>' +
+    '<linearGradient id="mtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5D7B5E"/><stop offset="100%" stop-color="#3D5A3E"/></linearGradient>' +
+    '<linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7BA669"/><stop offset="100%" stop-color="#5C8A4A"/></linearGradient>' +
+    '<radialGradient id="sun" cx="0.75" cy="0.25" r="0.15"><stop offset="0%" stop-color="#FFF9E0"/><stop offset="100%" stop-color="#FFD700"/></radialGradient>' +
+  '</defs>' +
+  '<rect width="400" height="180" fill="url(#sky)"/>' +
+  '<circle cx="300" cy="40" r="45" fill="#FFF9E0" opacity="0.9"/>' +
+  '<polygon points="80,180 200,60 320,180" fill="url(#mtn)"/>' +
+  '<polygon points="150,180 280,80 400,180" fill="#4A6B4A" opacity="0.7"/>' +
+  '<rect x="0" y="165" width="400" height="115" fill="url(#grass)"/>' +
+  '<rect x="0" y="165" width="400" height="3" fill="#3D5A3E" opacity="0.5"/>' +
+  '<circle cx="120" cy="240" r="25" fill="#E8A87C"/>' +
+  '<circle cx="125" cy="225" r="12" fill="#D4956C"/>' +
+  '<text x="160" y="245" fill="#5C3A2E" font-size="11" font-family="sans-serif" font-weight="bold">人物</text>' +
+  '</svg>'
+)
 
 export default function Assets() {
   const [activeType, setActiveType] = useState<AssetType>('全部')
