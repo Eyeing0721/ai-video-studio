@@ -401,14 +401,16 @@ VIDEO_TECH_REFERENCE = """
 ╚══════════════════════════════════════════════════════════════╝
 
 SULPHUR 2 / LTX 2.3 (primary model):
-  Architecture: 9B DiT, MIT license, T2V + I2V native
-  Resolution: 1024×1024 (our standard)
-  CFG: 3.0-5.5 (lower = more motion freedom, higher = more faithful to image)
-  Image Strength: 0.75-0.85 (higher = more faithful to input image)
+  Architecture: 22B DiT (Lightricks LTX 2.3 base), MIT license, T2V + I2V + audio native
+  Resolution: up to 4K (divisible by 32), 1024×1024 or 1088×608 (16:9) for 16GB GGUF Q4
+  CFG: 2.0-5.0 (default 3.0-3.5; lower = more motion, higher = more faithful)
+  Image Strength: 0.75-0.85
   Sampler: Euler + ManualSigmas
   Valid Frames: (F-1) % 8 == 0 → 49, 73, 97, 121, 201, 241
-  Duration: 4-8 seconds at 24fps is optimal
-  VRAM: 16GB handles 1024×1024 at 121 frames (~5s)
+  Duration: 4-8 seconds at 24fps optimal
+  VRAM: 16GB with GGUF Q4 handles 1024×1024 at 121 frames; FP8 needs 24GB+
+  Built-in audio VAE: generates synchronized audio from latent (use "no speech" in negative prompt)
+  Built-in x2 spatial upscaler + x2 temporal upscaler (FPS doubling)
 
   MOTION TIERS (success rate):
   HIGH SUCCESS (>90%): subtle head turns, slow hand gestures, micro-expressions,

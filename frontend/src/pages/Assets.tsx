@@ -111,6 +111,7 @@ export default function Assets() {
               togglePlay(id, item as Record<string, unknown>)
             }}
             onPreview={() => item._type === 'LUT' && setPreviewLut(item as unknown as LutItem)}
+            hasAudio={hasLocalAudio}
           />
         ))}
       </div>
@@ -176,11 +177,12 @@ export default function Assets() {
   )
 }
 
-function AssetCard({ item, isPlaying, onPlay, onPreview }: {
+function AssetCard({ item, isPlaying, onPlay, onPreview, hasAudio }: {
   item: Record<string, unknown> & { _type: string }
   isPlaying: boolean
   onPlay: () => void
   onPreview: () => void
+  hasAudio: (item: Record<string, unknown>) => boolean
 }) {
   const t = item._type
   const name = (item.name_cn as string) || (item.name as string) || '未命名'
@@ -199,7 +201,7 @@ function AssetCard({ item, isPlaying, onPlay, onPreview }: {
               <span className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                 {item.bpm ? `${item.bpm} BPM` : ''} {(item as BgmItem).duration_sec ? `${Math.round((item as BgmItem).duration_sec / 60)}:${String(Math.round((item as BgmItem).duration_sec % 60)).padStart(2, '0')}` : ''}
               </span>
-              {hasLocalAudio(item as Record<string,unknown>) ? (
+              {hasAudio(item as Record<string,unknown>) ? (
                 <button onClick={onPlay}
                   className="w-7 h-7 rounded-full flex items-center justify-center transition-all"
                   style={{ background: isPlaying ? 'var(--theme-accent)' : 'var(--theme-bg)', color: isPlaying ? '#fff' : 'var(--theme-text-secondary)' }}>
