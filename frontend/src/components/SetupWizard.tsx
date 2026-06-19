@@ -59,11 +59,17 @@ export default function SetupWizard({ onDone }: { onDone: () => void }) {
             : { ...item, status: 'error' as const, detail: '未配置', action: { label: '获取 API Key', url: 'https://platform.deepseek.com/api_keys' } }
         }
         if (item.key.startsWith('models_')) {
-          const modelKey = item.key.replace('models_', '')
+          const MODEL_MAP: Record<string, string> = {
+            models_zimage: 'z_image',
+            models_wan: 'wan_i2v_high',
+            models_sulphur: 'sulphur_fp8',
+          }
+          const realKey = MODEL_MAP[item.key] || item.key.replace('models_', '')
           const models = data.models || {}
-          return models[modelKey] ? { ...item, status: 'ok' as const, detail: '模型文件存在' }
+          const ok = models[realKey] === true
+          return ok ? { ...item, status: 'ok' as const, detail: '模型文件存在' }
             : { ...item, status: 'error' as const, detail: '模型文件缺失',
-              action: { label: '查看模型下载指引', url: '#' } }
+              action: { label: '下载指引', url: 'https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged' } }
         }
         return { ...item, status: 'ok' as const, detail: '正常' }
       })
