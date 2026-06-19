@@ -29,22 +29,19 @@ export default function Assets() {
     fetch(`${API}/api/sfx`).then(r => r.json()).then(d => Array.isArray(d) && setSfxs(d)).catch(() => {})
   }, [])
 
-  const AUDIO_FILES: Record<string, string> = {
-    'bgm_epic_cinematic': 'epic_cinematic_total_war',
-    'bgm_inspirational_uplifting': 'inspirational_uplifting',
-    'bgm_emotional_cinematic': 'emotional_cinematic_piano_strings',
-    'bgm_upbeat_rock': 'upbeat_rock',
-    'bgm_cinematic_tension': 'inspirational_uplifting',
-    'bgm_powerful_motivational': 'inspirational_uplifting',
-  }
-
   const getAudioUrl = (item: Record<string, unknown>) => {
-    const fn = AUDIO_FILES[(item.id as string) || '']
-    return fn ? `/media/bgm/${fn}.mp3` : ''
+    // Use Pixabay CDN URL from API — works without local download
+    const url = (item as BgmItem).url
+    if (url) return url
+    // Fallback: try local file
+    const id = (item.id as string) || ''
+    return id ? `/media/bgm/${id.replace('bgm_', '')}.mp3` : ''
   }
 
-  const hasLocalAudio = (item: Record<string, unknown>) => {
-    return !!(AUDIO_FILES[(item.id as string) || ''])
+  const hasLocalAudio = (_item: Record<string, unknown>) => {
+    // All BGM tracks have Pixabay URLs — always show play button
+    const url = (_item as BgmItem).url
+    return !!(url)
   }
 
   const togglePlay = (itemId: string, item: Record<string, unknown>) => {
