@@ -27,47 +27,48 @@
   }
 }
 
-/* Liquid Glass — iOS 26 style multi-layer glassmorphism */
+/* Liquid Glass — iOS 26 style with specular highlights & internal reflections */
 .glass-sidebar {
-  background: color-mix(in srgb, var(--theme-surface) 55%, transparent);
-  backdrop-filter: blur(var(--blur-sidebar, 12px)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur-sidebar, 12px)) saturate(150%);
-  border-right: 1px solid color-mix(in srgb, var(--theme-border) 25%, transparent);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(var(--blur-sidebar, 12px)) saturate(180%) brightness(1.05);
+  -webkit-backdrop-filter: blur(var(--blur-sidebar, 12px)) saturate(180%) brightness(1.05);
+  border-right: 1px solid rgba(255,255,255,0.15);
   box-shadow:
-    2px 0 24px rgb(0 0 0 / 0.04),
-    inset -1px 0 1px rgb(255 255 255 / 0.06);
+    2px 0 32px rgba(0,0,0,0.06),
+    inset -2px 0 20px rgba(255,255,255,0.12);
 }
 .glass-card {
-  background: color-mix(in srgb, var(--theme-surface) 65%, transparent);
-  backdrop-filter: blur(var(--blur-card, 8px)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--blur-card, 8px)) saturate(160%);
-  border: 1px solid color-mix(in srgb, var(--theme-border) 30%, transparent);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(var(--blur-card, 8px)) saturate(180%) brightness(1.03);
+  -webkit-backdrop-filter: blur(var(--blur-card, 8px)) saturate(180%) brightness(1.03);
+  border: 1px solid rgba(255,255,255,0.2);
   box-shadow:
-    0 4px 16px rgb(0 0 0 / 0.05),
-    0 1px 4px rgb(0 0 0 / 0.03),
-    inset 0 1px 1px rgb(255 255 255 / 0.08);
+    0 4px 16px rgba(0,0,0,0.06),
+    0 1px 4px rgba(0,0,0,0.04),
+    inset 0 1px 2px rgba(255,255,255,0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .glass-modal {
   background:
-    radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--theme-accent) 4%, transparent) 0%, transparent 60%),
-    color-mix(in srgb, var(--theme-surface) 72%, transparent);
-  backdrop-filter: blur(var(--blur-modal, 20px)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur-modal, 20px)) saturate(180%);
-  border: 1px solid color-mix(in srgb, var(--theme-border) 40%, transparent);
+    radial-gradient(ellipse at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 60%),
+    rgba(255,255,255,0.1);
+  backdrop-filter: blur(var(--blur-modal, 20px)) saturate(200%) brightness(1.05);
+  -webkit-backdrop-filter: blur(var(--blur-modal, 20px)) saturate(200%) brightness(1.05);
+  border: 1px solid rgba(255,255,255,0.18);
   box-shadow:
-    0 8px 32px -4px rgb(0 0 0 / 0.12),
-    0 4px 16px -4px rgb(0 0 0 / 0.06),
-    inset 0 1px 1px rgb(255 255 255 / 0.1);
+    0 12px 40px rgba(0,0,0,0.15),
+    0 4px 16px rgba(0,0,0,0.08),
+    inset 0 2px 20px rgba(255,255,255,0.15),
+    inset 0 -2px 4px rgba(0,0,0,0.03);
 }
 .glass-panel {
-  background: color-mix(in srgb, var(--theme-surface) 75%, transparent);
-  backdrop-filter: blur(var(--blur-panel, 4px)) saturate(140%);
-  -webkit-backdrop-filter: blur(var(--blur-panel, 4px)) saturate(140%);
-  border: 1px solid color-mix(in srgb, var(--theme-border) 35%, transparent);
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(var(--blur-panel, 4px)) saturate(160%) brightness(1.02);
+  -webkit-backdrop-filter: blur(var(--blur-panel, 4px)) saturate(160%) brightness(1.02);
+  border: 1px solid rgba(255,255,255,0.22);
   box-shadow:
-    0 2px 8px rgb(0 0 0 / 0.04),
-    inset 0 1px 1px rgb(255 255 255 / 0.06);
+    0 2px 8px rgba(0,0,0,0.04),
+    inset 0 1px 2px rgba(255,255,255,0.25);
 }
 
 /* Page mount animation */
@@ -137,6 +138,90 @@
 .stagger > *:nth-child(6) { animation-delay: 300ms; }
 .stagger > *:nth-child(7) { animation-delay: 360ms; }
 .stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+/* ── iOS 26 Liquid Glass Components ───────────────────── */
+
+/* Liquid Button */
+.liquid-btn {
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.06),
+    inset 0 1px 2px rgba(255,255,255,0.6);
+  transition: all 200ms ease-out;
+}
+.liquid-btn:hover {
+  background: rgba(255,255,255,0.55);
+  transform: scale(1.03);
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.08),
+    inset 0 1px 2px rgba(255,255,255,0.7);
+}
+.liquid-btn:active {
+  transform: scale(0.97);
+  background: rgba(255,255,255,0.35);
+}
+
+/* Liquid Tab - active state has higher opacity + specular */
+.liquid-tab-active {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.1),
+    inset 0 1px 1px rgba(255,255,255,0.8);
+}
+.liquid-tab {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid transparent;
+  transition: all 300ms ease-out;
+}
+.liquid-tab:hover {
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+/* Liquid Icon - dual layer gradient + glass */
+.liquid-icon {
+  background: linear-gradient(135deg, var(--theme-accent), color-mix(in srgb, var(--theme-accent) 60%, var(--theme-surface)));
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.06),
+    inset 0 1px 2px rgba(255,255,255,0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.liquid-icon::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-radius: inherit;
+}
+
+/* Liquid field (input/select/textarea) */
+.liquid-field {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+  transition: all 200ms ease;
+}
+.liquid-field:focus {
+  background: rgba(255,255,255,0.45);
+  border-color: var(--theme-accent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--theme-accent) 20%, transparent),
+    inset 0 1px 2px rgba(255,255,255,0.5);
+  outline: none;
+}
 
 /* Smooth theme toggle */
 .theme-transition,
