@@ -28,27 +28,7 @@ applyTheme(_initConfig)
 
 export function useTheme() {
   const [preset, setPreset] = useState<ThemePreset>(getInitialPreset)
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        return parsed.preset || 'light'
-      } catch { /* ignore */ }
-    }
-    return 'light'
-  })
-
-  const [config, setConfig] = useState<ThemeConfig>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (parsed.preset === 'custom' && parsed.config) return parsed.config
-        if (PRESETS[parsed.preset as ThemePreset]) return PRESETS[parsed.preset as ThemePreset]
-      } catch { /* ignore */ }
-    }
-    return PRESETS.light
-  })
+  const [config, setConfig] = useState<ThemeConfig>(_initConfig)
 
   useEffect(() => {
     applyTheme(config)
