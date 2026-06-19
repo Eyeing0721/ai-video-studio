@@ -22,9 +22,10 @@ DEEPSEEK_URL = config["deepseek_base_url"].rstrip("/")
 API_KEY = config["deepseek_api_key"]
 
 # The model string from user's config
-MODEL = "deepseek-v4-pro"
-# With 1M context if the provider supports it — for storyboarding long novels
+MODEL = "deepseek-v4-pro[1m]"
 MODEL_LONG = "deepseek-v4-pro[1m]"
+THINKING_BUDGET = 4096  # max reasoning tokens
+TEMPERATURE = 0.9       # higher creativity for diverse shots
 
 STORYBOARD_SYSTEM = """你是一位资深电影摄影师和分镜师。运用纪录片和影视叙事的专业技法，将文本拆解为电影级分镜。
 
@@ -130,8 +131,8 @@ async def generate_storyboard(
         "max_tokens": 8192,
         "system": STORYBOARD_SYSTEM,
         "messages": [{"role": "user", "content": user_msg}],
-        "thinking": {"type": "enabled", "budget_tokens": 2048},
-        "temperature": 0.7,
+        "thinking": {"type": "enabled", "budget_tokens": THINKING_BUDGET},
+        "temperature": TEMPERATURE,
     }
 
     async with httpx.AsyncClient(timeout=120) as client:
@@ -193,7 +194,7 @@ async def continue_text(
             "role": "user",
             "content": f"请续写以下故事, 续写{length}, 保持风格一致:\n\n{text}",
         }],
-        "temperature": 0.8,
+        "temperature": 0.9,
     }
 
     async with httpx.AsyncClient(timeout=120) as client:
@@ -223,7 +224,7 @@ async def expand_one_liner(
             "role": "user",
             "content": f"根据以下一句话描述, 扩写为约{word_count}字的完整故事, 含起承转合结构:\n\n{sentence}",
         }],
-        "temperature": 0.8,
+        "temperature": 0.9,
     }
 
     async with httpx.AsyncClient(timeout=180) as client:
@@ -264,7 +265,7 @@ async def structured_create(
         "max_tokens": 8192,
         "system": CREATION_SYSTEM,
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.8,
+        "temperature": 0.9,
     }
 
     async with httpx.AsyncClient(timeout=180) as client:
