@@ -160,8 +160,14 @@ async def run_full_pipeline(
     session_factory: async_sessionmaker,
     manager=None,
     template_id: str = "micro_drama",
+    skip_storyboard: bool = False,
 ):
-    """Execute the complete generation pipeline for a task."""
+    """Execute the complete generation pipeline for a task.
+
+    When skip_storyboard=False (default), the pipeline stops after
+    storyboarding and waits for user approval via POST /api/tasks/{id}/approve.
+    When skip_storyboard=True, continues from image generation onward.
+    """
 
     pipeline_start = time.time()
 
@@ -227,6 +233,13 @@ async def run_full_pipeline(
             )
             t.recipe_json = json.dumps(recipe, ensure_ascii=False)
             await s.commit()
+
+            # ── Pause for user approval ───────────────────
+            if not skip_storyboard:
+                await notify(manager, task_id, "awaiting_approval", "等待审批", 10,
+                             storyboard=shots_data, recipe=recipe)
+                await s.commit()
+                return  # Stop here — user calls /approve to continue
 
             # ── Step 2: Generate keyframes ────────────────
             await notify(manager, task_id, "generating_images", "静态图生成", 15)

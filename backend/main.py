@@ -388,6 +388,25 @@ async def recommend_styles(template: str = "vlog"):
     }
 
 
+# ── Storyboard Approval ───────────────────────────────
+
+@app.post("/api/tasks/{task_id}/approve")
+async def approve_storyboard(task_id: str):
+    """User approves the storyboard → kick off image/video generation."""
+    async with Session() as s:
+        from models.task import Task, TaskStatus
+        t = await s.get(Task, task_id)
+        if not t:
+            return {"error": "task not found"}
+        if t.status != TaskStatus.storyboarding:
+            return {"error": f"task is not awaiting approval (current: {t.status.value})"}
+        # Continue pipeline from image generation onward
+        t.status = TaskStatus.generating_images
+        await s.commit()
+    asyncio.create_task(run_pipeline(task_id, skip_storyboard=True))
+    return {"status": "approved", "task_id": task_id}
+
+
 # ── Auto-Edit ─────────────────────────────────────────
 
 @app.post("/api/edit/instruct")
@@ -461,7 +480,7 @@ async def text_revise(data: dict):
 
 # ── Pipeline runner (wired to real services) ───────────
 
-async def run_pipeline(task_id: str, template_id: str = "micro_drama"):
+async def run_pipeline(task_id: str, template_id: str = "micro_drama", skip_storyboard: bool = False):
     from services.pipeline import run_full_pipeline
     try:
         await run_full_pipeline(
@@ -469,6 +488,7 @@ async def run_pipeline(task_id: str, template_id: str = "micro_drama"):
             session_factory=Session,
             manager=manager,
             template_id=template_id,
+            skip_storyboard=skip_storyboard,
         )
     except Exception as exc:
         logger.exception(f"Pipeline {task_id} crashed")
