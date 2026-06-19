@@ -33,6 +33,8 @@ class Task(Base):
     output_dir: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     progress: Mapped[float] = mapped_column(Float, default=0.0)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    recipe_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    template_id: Mapped[str] = mapped_column(String(50), default="micro_drama")
     resolution: Mapped[str] = mapped_column(String(20), default="1080p")
     fps: Mapped[int] = mapped_column(Integer, default=24)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
@@ -43,6 +45,13 @@ class Task(Base):
         import json
         if self.storyboard_json:
             return json.loads(self.storyboard_json)
+        return None
+
+    @property
+    def recipe(self) -> Optional[dict]:
+        import json
+        if self.recipe_json:
+            return json.loads(self.recipe_json)
         return None
 
 

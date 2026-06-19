@@ -118,6 +118,7 @@ async def get_task(task_id: str):
         "error_message": t.error_message,
         "resolution": t.resolution, "fps": t.fps,
         "storyboard": t.storyboard,
+        "recipe": t.recipe_json,
         "shots": [
             {
                 "id": s.id, "shot_index": s.shot_index,
@@ -134,6 +135,8 @@ async def get_task(task_id: str):
 async def create_task(data: dict):
     task_id = str(uuid.uuid4())
     task_type = data.get("type", "generate")
+    template_id = data.get("template", "micro_drama")
+
     async with Session() as s:
         from models.task import Task
         t = Task(
@@ -146,9 +149,11 @@ async def create_task(data: dict):
         s.add(t)
         await s.commit()
 
-    # Kick off pipeline in background
-    asyncio.create_task(run_pipeline(task_id))
-    return {"task_id": task_id, "status": "pending"}
+    # Kick off full pipeline in background
+    asyncio.create_task(
+        run_pipeline(task_id, template_id=template_id)
+    )
+    return {"task_id": task_id, "status": "pending", "template": template_id}
 
 
 @app.websocket("/ws/tasks/{task_id}")
@@ -156,45 +161,97 @@ async def ws_task(ws: WebSocket, task_id: str):
     await manager.connect(ws, task_id)
     try:
         while True:
-            await ws.receive_text()  # keep alive, client can ping
+            await ws.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(task_id)
 
 
-# ── Pipeline runner (stub — to be fleshed out) ──────────
+# ── Templates ──────────────────────────────────────────
 
-async def run_pipeline(task_id: str):
-    """Full pipeline: storyboarding -> images -> videos -> upscale -> TTS -> composite."""
-    async with Session() as s:
-        from models.task import Task, TaskStatus, Shot
-        t = await s.get(Task, task_id)
-        if not t:
-            return
+@app.get("/api/templates")
+async def list_templates():
+    from services.templates import list_templates as lt
+    return lt()
 
-        steps = [
-            ("storyboarding", "分镜拆解"),
-            ("generating_images", "静态图生成"),
-            ("generating_videos", "图生视频"),
-            ("upscaling", "超分辨率"),
-            ("generating_audio", "配音生成"),
-            ("compositing", "后期合成"),
-            ("packaging", "资产打包"),
-        ]
 
-        for status_key, label in steps:
-            t.status = TaskStatus(status_key)
-            t.progress = (steps.index((status_key, label)) / len(steps)) * 100
-            await s.commit()
-            await manager.send(task_id, {
-                "type": "status", "status": status_key, "label": label,
-                "progress": t.progress,
-            })
-            await asyncio.sleep(0.5)  # placeholder — real work goes here
+@app.get("/api/templates/{template_id}")
+async def get_template(template_id: str):
+    from services.templates import get_template as gt
+    t = gt(template_id)
+    if not t:
+        return {"error": "not found"}
+    return t
 
-        t.status = TaskStatus.completed
-        t.progress = 100
-        await s.commit()
-        await manager.send(task_id, {"type": "completed", "progress": 100})
+
+# ── Text Creation ──────────────────────────────────────
+
+@app.post("/api/text/continue")
+async def text_continue(data: dict):
+    from services.deepseek_client import continue_text
+    text = data.get("text", "")
+    length = data.get("length", "3个段落")
+    key = data.get("api_key", "")
+    result = await continue_text(text, length, api_key=key or config["deepseek_api_key"])
+    return {"text": result}
+
+
+@app.post("/api/text/expand")
+async def text_expand(data: dict):
+    from services.deepseek_client import expand_one_liner
+    sentence = data.get("sentence", "")
+    word_count = data.get("word_count", 2000)
+    key = data.get("api_key", "")
+    result = await expand_one_liner(sentence, word_count, api_key=key or config["deepseek_api_key"])
+    return {"text": result}
+
+
+@app.post("/api/text/structured")
+async def text_structured(data: dict):
+    from services.deepseek_client import structured_create
+    key = data.get("api_key", "")
+    result = await structured_create(
+        characters=data.get("characters", ""),
+        persona=data.get("persona", ""),
+        world=data.get("world", ""),
+        style=data.get("style", ""),
+        plot=data.get("plot", ""),
+        word_count=data.get("word_count", 3000),
+        api_key=key or config["deepseek_api_key"],
+    )
+    return {"text": result}
+
+
+@app.post("/api/text/revise")
+async def text_revise(data: dict):
+    from services.deepseek_client import revise_text
+    original = data.get("text", "")
+    instruction = data.get("instruction", "")
+    key = data.get("api_key", "")
+    result = await revise_text(original, instruction, api_key=key or config["deepseek_api_key"])
+    return {"text": result}
+
+
+# ── Pipeline runner (wired to real services) ───────────
+
+async def run_pipeline(task_id: str, template_id: str = "micro_drama"):
+    from services.pipeline import run_full_pipeline
+    try:
+        await run_full_pipeline(
+            task_id=task_id,
+            session_factory=Session,
+            manager=manager,
+            template_id=template_id,
+        )
+    except Exception as exc:
+        logger.exception(f"Pipeline {task_id} crashed")
+        async with Session() as s:
+            from models.task import Task, TaskStatus
+            t = await s.get(Task, task_id)
+            if t:
+                t.status = TaskStatus.failed
+                t.error_message = str(exc)
+                await s.commit()
+        await manager.send(task_id, {"type": "failed", "error": str(exc)})
 
 
 # ── Entry point ─────────────────────────────────────────
