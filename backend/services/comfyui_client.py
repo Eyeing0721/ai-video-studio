@@ -49,6 +49,7 @@ class ComfyUIClient:
         self.base_url = base_url.rstrip("/")
         self.client_id = str(uuid.uuid4())
         self.ws = None
+        self._node_counter = 0
 
     # ── REST ──────────────────────────────────────────────
 
@@ -139,8 +140,9 @@ class ComfyUIClient:
     # ── Workflow builders ─────────────────────────────────
 
     def _node_id(self) -> str:
-        """Generate a unique node ID (ComfyUI uses string keys)."""
-        return str(int(time.time() * 1000) % 1000000)
+        """Generate a unique node ID."""
+        self._node_counter += 1
+        return str(self._node_counter)
 
     def build_txt2img_workflow(
         self,
@@ -148,60 +150,110 @@ class ComfyUIClient:
         negative_prompt: str = "",
         width: int = GEN["z_image_width"],
         height: int = GEN["z_image_height"],
-        model_name: str = MODELS["z_image"],
         seed: int = -1,
+        enable_upscale: bool = True,
     ) -> dict:
-        """Build a Z-Image Turbo text-to-image workflow."""
+        """Build a Z-Image Turbo text-to-image workflow with optional 4x upscale.
+
+        Uses standard ComfyUI nodes: UNETLoader + CLIPLoader (qwen lumina2) + KSampler.
+        Based on verified working workflow: Text_to_Image_(Z-Image-Turbo)my.json
+        """
         import random
         seed = seed if seed >= 0 else random.randint(0, 2**31 - 1)
 
-        loader = self._node_id()
         clip = self._node_id()
-        pos = self._node_id()
-        neg = self._node_id()
+        vae = self._node_id()
+        unet = self._node_id()
+        sampling = self._node_id()
+        positive = self._node_id()
+        negative = self._node_id()
         latent = self._node_id()
         sampler = self._node_id()
         decode = self._node_id()
-        save = self._node_id()
 
-        return {
-            loader: {
-                "class_type": "UNETLoader",
-                "inputs": {"unet_name": model_name, "weight_dtype": "default"},
-            },
+        nodes = {
             clip: {
                 "class_type": "CLIPLoader",
-                "inputs": {"clip_name": "t5xxl_fp8_e4m3fn.safetensors", "type": "wan", "device": "default"},
+                "inputs": {"clip_name": "qwen_3_4b.safetensors", "type": "lumina2", "device": "default"},
             },
-            pos: {
-                "class_type": "CLIPTextEncode",
-                "inputs": {"clip": [clip, 0], "text": positive_prompt},
+            vae: {
+                "class_type": "VAELoader",
+                "inputs": {"vae_name": "ae.safetensors"},
             },
-            neg: {
+            unet: {
+                "class_type": "UNETLoader",
+                "inputs": {"unet_name": MODELS["z_image"], "weight_dtype": "default"},
+            },
+            sampling: {
+                "class_type": "ModelSamplingAuraFlow",
+                "inputs": {"shift": 3, "model": [unet, 0]},
+            },
+            positive: {
                 "class_type": "CLIPTextEncode",
-                "inputs": {"clip": [clip, 0], "text": negative_prompt or "worst quality, blurry, distorted"},
+                "inputs": {"text": positive_prompt, "clip": [clip, 0]},
+            },
+            negative: {
+                "class_type": "CLIPTextEncode",
+                "inputs": {"text": negative_prompt or "worst quality, blurry, distorted, lowres", "clip": [clip, 0]},
             },
             latent: {
-                "class_type": "EmptyLatentImage",
+                "class_type": "EmptySD3LatentImage",
                 "inputs": {"width": width, "height": height, "batch_size": 1},
             },
             sampler: {
                 "class_type": "KSampler",
                 "inputs": {
-                    "model": [loader, 0], "positive": [pos, 0], "negative": [neg, 0],
-                    "latent_image": [latent, 0], "seed": seed, "steps": 8, "cfg": 1.0,
-                    "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0,
+                    "seed": seed, "steps": 8, "cfg": 1.0, "sampler_name": "res_multistep", "scheduler": "simple",
+                    "denoise": 1.0, "model": [sampling, 0], "positive": [positive, 0],
+                    "negative": [0, 0], "latent_image": [latent, 0],  # replaced below
                 },
             },
             decode: {
                 "class_type": "VAEDecode",
-                "inputs": {"samples": [sampler, 0], "vae": [loader, 1]},
-            },
-            save: {
-                "class_type": "SaveImage",
-                "inputs": {"filename_prefix": "avs_txt2img", "images": [decode, 0]},
+                "inputs": {"samples": [sampler, 0], "vae": [vae, 0]},
             },
         }
+
+        # Add ConditioningZeroOut for negative
+        conditioning_zero = self._node_id()
+        nodes[conditioning_zero] = {
+            "class_type": "ConditioningZeroOut",
+            "inputs": {"conditioning": [negative, 0]},
+        }
+        # Fix the sampler's negative reference
+        nodes[sampler]["inputs"]["negative"] = [conditioning_zero, 0]
+
+        if enable_upscale:
+            upscale_loader = self._node_id()
+            upscaler = self._node_id()
+            resize = self._node_id()
+            save = self._node_id()
+            nodes.update({
+                upscale_loader: {
+                    "class_type": "UpscaleModelLoader",
+                    "inputs": {"model_name": "4x-UltraSharp.pth"},
+                },
+                upscaler: {
+                    "class_type": "ImageUpscaleWithModel",
+                    "inputs": {"upscale_model": [upscale_loader, 0], "image": [decode, 0]},
+                },
+                resize: {
+                    "class_type": "ResizeImagesByLongerEdge",
+                    "inputs": {"longer_edge": max(width, height) * 2, "images": [upscaler, 0]},
+                },
+                save: {
+                    "class_type": "SaveImage",
+                    "inputs": {"filename_prefix": "avs_txt2img", "images": [resize, 0]},
+                },
+            })
+        else:
+            save = self._node_id()
+            nodes[save] = {
+                "class_type": "SaveImage",
+                "inputs": {"filename_prefix": "avs_txt2img", "images": [decode, 0]},
+            }
+
+        return nodes
 
     def build_img2video_workflow_wan(
         self,
